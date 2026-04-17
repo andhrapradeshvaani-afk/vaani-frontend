@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 
-const API = 'http://localhost:3001';
+const API = 'https://vaani-backend-w3zz.onrender.com';
 
 const STATUS_FLOW = [
   { value: 'acknowledged', label: 'Acknowledge',  color: '#7c3aed', desc: 'Confirm complaint received' },

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API = 'http://localhost:3001';
+const API = 'https://vaani-backend-w3zz.onrender.com';
 
 export default function OfficerLogin() {
   const router = useRouter();

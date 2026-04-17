@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const API = 'http://localhost:3001';
+const API = 'https://vaani-backend-w3zz.onrender.com';
 
 export default function OfficerDashboard() {
   const router = useRouter();

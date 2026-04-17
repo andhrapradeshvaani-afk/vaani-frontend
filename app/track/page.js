@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Nav from '../components/Nav';
 
-const API = 'http://localhost:3001';
+const API = 'https://vaani-backend-w3zz.onrender.com';
 
 const statusColors = {
   submitted: 'done', acknowledged: 'done', assigned: 'done',

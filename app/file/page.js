@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Nav from '../components/Nav';
 
-const API = 'http://localhost:3001';
+const API = 'https://vaani-backend-w3zz.onrender.com';
 
 export default function FilePage() {
   const [lang, setLang]           = useState('en');
