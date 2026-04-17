@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Nav from './components/Nav';
 
@@ -40,7 +40,15 @@ const content = {
 
 export default function Home() {
   const [lang, setLang] = useState('en');
+  const [stats, setStats] = useState({ total: 0, resolved: 0, in_progress: 0, pending: 0 });
   const c = content[lang];
+
+  useEffect(() => {
+    fetch(`https://vaani-backend-w3zz.onrender.com/api/dashboard/public`)
+      .then(r => r.json())
+      .then(d => setStats(d.totals))
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -72,10 +80,10 @@ export default function Home() {
           <div className="page-title" style={{marginBottom:'16px'}}>{c.stats_title}</div>
           <div className="stats-grid">
             {[
-              {n:'0', l: lang==='en'?'Total complaints':'మొత్తం ఫిర్యాదులు'},
-              {n:'0', l: lang==='en'?'Resolved':'పరిష్కరించబడింది'},
-              {n:'0', l: lang==='en'?'In progress':'పురోగతిలో'},
-              {n:'0', l: lang==='en'?'Districts covered':'జిల్లాలు'},
+              {n: stats.total || 0,       l: lang==='en'?'Total complaints':'మొత్తం ఫిర్యాదులు'},
+              {n: stats.resolved || 0,    l: lang==='en'?'Resolved':'పరిష్కరించబడింది'},
+              {n: stats.in_progress || 0, l: lang==='en'?'In progress':'పురోగతిలో'},
+              {n: stats.pending || 0,     l: lang==='en'?'Pending':'పెండింగ్'},
             ].map((s,i) => (
               <div className="stat-card" key={i}>
                 <div className="stat-num">{s.n}</div>
