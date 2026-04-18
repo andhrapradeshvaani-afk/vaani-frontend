@@ -49,12 +49,11 @@ export default function CommunityPage() {
   };
 
   const upvote = async (complaintNo) => {
-    if (upvotePhone.length !== 10) { alert('Enter a valid 10-digit mobile number'); return; }
     setUpvoting(complaintNo);
     try {
       const res = await fetch(`${API}/api/complaints/${complaintNo}/upvote`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: upvotePhone })
+        body: JSON.stringify({})
       });
       const data = await res.json();
       if (res.status === 409) {
