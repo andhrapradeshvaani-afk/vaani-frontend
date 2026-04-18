@@ -14,7 +14,7 @@ export default function Nav({ lang, setLang }) {
   return (
     <nav className="nav">
       <Link href="/" className="nav-brand">
-        <div className="nav-logo">V</div>
+        <img src="/favicon.png" alt="Vaani" style={{width:'40px',height:'40px',borderRadius:'10px',objectFit:'cover'}} />
         <div>
           <div className="nav-title">Vaani</div>
           <div className="nav-te">వాణి</div>
