@@ -177,12 +177,18 @@ export default function CommunityPage() {
                     )}
                   </div>
 
-                  <button onClick={()=>upvote(c.complaint_no)} disabled={upvoting === c.complaint_no}
-                    style={{padding:'6px 16px',background:'var(--ap-navy)',color:'white',
-                      border:'none',borderRadius:'8px',fontWeight:'600',fontSize:'13px',
-                      cursor:'pointer',fontFamily:'inherit'}}>
-                    {upvoting === c.complaint_no ? '...' : `👆 ${te ? 'నాకూ ఇదే సమస్య' : 'I have this issue too'}`}
-                  </button>
+                  {upvoted.has(c.complaint_no) ? (
+                    <div style={{fontSize:'13px',color:'#16a34a',fontWeight:'600'}}>
+                      ✓ {te ? 'మీరు మద్దతిచ్చారు' : 'You supported this'}
+                    </div>
+                  ) : (
+                    <button onClick={()=>upvote(c.complaint_no)} disabled={upvoting === c.complaint_no}
+                      style={{padding:'6px 16px',background:'var(--ap-navy)',color:'white',
+                        border:'none',borderRadius:'8px',fontWeight:'600',fontSize:'13px',
+                        cursor:'pointer',fontFamily:'inherit'}}>
+                      {upvoting === c.complaint_no ? '...' : `👆 ${te ? 'నాకూ ఇదే సమస్య' : 'I have this issue too'}`}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
