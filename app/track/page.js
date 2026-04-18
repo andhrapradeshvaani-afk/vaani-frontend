@@ -277,7 +277,7 @@ export default function TrackPage() {
                   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                     <div>
                       <div style={{fontSize:'13px',fontWeight:'600',color:'var(--text-1)'}}>
-                        👆 {upvoteCount ?? 0} {te ? 'నాగరికులు మద్దతిచ్చారు' : 'citizens supported this'}
+                        👆 {upvoteCount ?? 0} {te ? 'నాగరికులు మద్దతిచ్చారు' : `${(upvoteCount ?? 0) === 1 ? 'citizen' : 'citizens'} supported this`}
                       </div>
                       {upvoteCount >= 10 && (
                         <div style={{fontSize:'12px',color:'#ea580c',marginTop:'2px'}}>

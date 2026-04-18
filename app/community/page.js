@@ -62,7 +62,9 @@ export default function CommunityPage() {
         setComplaints(prev => prev.map(c =>
           c.complaint_no === complaintNo ? { ...c, upvote_count: data.upvote_count } : c
         ));
-        alert(te ? `ధన్యవాదాలు! మొత్తం మద్దతు: ${data.upvote_count}` : `Thank you! ${data.upvote_count} people support this now.`);
+        const newCount = data.upvote_count || 0;
+        const citizenWord = newCount === 1 ? 'citizen' : 'citizens';
+        alert(te ? `ధన్యవాదాలు! 🙏 మొత్తం మద్దతు: ${newCount}` : `Thank you! ${newCount} ${citizenWord} now support this.`);
       }
       setShowInput(null);
       setUpvotePhone('');
