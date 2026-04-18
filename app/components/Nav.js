@@ -1,11 +1,10 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
 
 const t = {
-  en: { home: 'Home', file: 'File Complaint', track: 'Track', dashboard: 'Dashboard', lang: 'తెలుగు' },
-  te: { home: 'హోమ్', file: 'ఫిర్యాదు నమోదు', track: 'ట్రాక్', dashboard: 'డాష్‌బోర్డ్', lang: 'English' },
+  en: { home: 'Home', file: 'File Complaint', track: 'Track', dashboard: 'Dashboard', lang: 'తెలుగు', officer: 'Officer Login' },
+  te: { home: 'హోమ్', file: 'ఫిర్యాదు నమోదు', track: 'ట్రాక్', dashboard: 'డాష్‌బోర్డ్', lang: 'English', officer: 'అధికారి లాగిన్' },
 };
 
 export default function Nav({ lang, setLang }) {
@@ -27,6 +26,11 @@ export default function Nav({ lang, setLang }) {
         <Link href="/track"     className={`nav-link ${path === '/track' ? 'active' : ''}`}>{l.track}</Link>
         <Link href="/dashboard" className={`nav-link ${path === '/dashboard' ? 'active' : ''}`}>{l.dashboard}</Link>
         <button className="lang-btn" onClick={() => setLang(lang === 'en' ? 'te' : 'en')}>{l.lang}</button>
+        <Link href="/officer/login"
+          style={{fontSize:'12px',color:'var(--text-3)',textDecoration:'underline',opacity:'0.6'}}
+          className={`nav-link ${path.startsWith('/officer') ? 'active' : ''}`}>
+          {l.officer}
+        </Link>
       </div>
     </nav>
   );
