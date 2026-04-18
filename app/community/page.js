@@ -177,29 +177,12 @@ export default function CommunityPage() {
                     )}
                   </div>
 
-                  {showInput === c.complaint_no ? (
-                    <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
-                      <input className="form-input" value={upvotePhone}
-                        onChange={e=>setUpvotePhone(e.target.value)}
-                        placeholder={te ? 'మొబైల్ నంబర్' : 'Mobile number'}
-                        maxLength={10} style={{width:'140px',padding:'6px 10px',fontSize:'13px'}}/>
-                      <button onClick={()=>upvote(c.complaint_no)} disabled={upvoting === c.complaint_no}
-                        style={{padding:'6px 14px',background:'var(--ap-gold)',color:'var(--ap-navy)',
-                          border:'none',borderRadius:'8px',fontWeight:'700',cursor:'pointer',fontSize:'13px',fontFamily:'inherit'}}>
-                        {upvoting === c.complaint_no ? '...' : '👍'}
-                      </button>
-                      <button onClick={()=>{setShowInput(null);setUpvotePhone('');}}
-                        style={{padding:'6px 10px',background:'none',border:'1px solid var(--border)',
-                          borderRadius:'8px',cursor:'pointer',fontFamily:'inherit',color:'var(--text-2)'}}>✕</button>
-                    </div>
-                  ) : (
-                    <button onClick={()=>setShowInput(c.complaint_no)}
-                      style={{padding:'6px 16px',background:'var(--ap-navy)',color:'white',
-                        border:'none',borderRadius:'8px',fontWeight:'600',fontSize:'13px',
-                        cursor:'pointer',fontFamily:'inherit'}}>
-                      👆 {te ? 'మద్దతివ్వండి' : 'Support this'}
-                    </button>
-                  )}
+                  <button onClick={()=>upvote(c.complaint_no)} disabled={upvoting === c.complaint_no}
+                    style={{padding:'6px 16px',background:'var(--ap-navy)',color:'white',
+                      border:'none',borderRadius:'8px',fontWeight:'600',fontSize:'13px',
+                      cursor:'pointer',fontFamily:'inherit'}}>
+                    {upvoting === c.complaint_no ? '...' : `👆 ${te ? 'నాకూ ఇదే సమస్య' : 'I have this issue too'}`}
+                  </button>
                 </div>
               </div>
             ))}

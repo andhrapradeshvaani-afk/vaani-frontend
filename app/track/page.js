@@ -90,21 +90,18 @@ export default function TrackPage() {
   };
 
   const upvote = async () => {
-    if (upvotePhone.length !== 10) { alert('Enter a valid 10-digit mobile number'); return; }
     setUpvoteLoading(true);
     try {
       const res = await fetch(`${API}/api/complaints/${result.complaint.complaint_no}/upvote`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: upvotePhone })
+        body: JSON.stringify({})
       });
       const data = await res.json();
       if (res.status === 409) {
-        alert(te ? 'మీరు ఇప్పటికే వోట్ చేశారు' : 'You have already supported this complaint');
         setHasUpvoted(true);
       } else {
         setUpvoteCount(data.upvote_count);
         setHasUpvoted(true);
-        setShowUpvoteInput(false);
       }
     } catch { alert('Failed to upvote. Please try again.'); }
     setUpvoteLoading(false);
@@ -273,49 +270,27 @@ export default function TrackPage() {
 
               {/* Upvote section */}
               <div style={{borderTop:'1px solid var(--border)',paddingTop:'12px'}}>
-                {!showUpvoteInput ? (
-                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                    <div>
-                      <div style={{fontSize:'13px',fontWeight:'600',color:'var(--text-1)'}}>
-                        👆 {upvoteCount ?? 0} {te ? 'నాగరికులు మద్దతిచ్చారు' : `${(upvoteCount ?? 0) === 1 ? 'citizen' : 'citizens'} supported this`}
-                      </div>
-                      {upvoteCount >= 10 && (
-                        <div style={{fontSize:'12px',color:'#ea580c',marginTop:'2px'}}>
-                          🔥 {te ? 'కమ్యూనిటీ సమస్య — High Priority కి పెంచబడింది' : 'Community issue — escalated to High Priority'}
-                        </div>
-                      )}
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                  <div>
+                    <div style={{fontSize:'13px',fontWeight:'600',color:'var(--text-1)'}}>
+                      👆 {upvoteCount ?? 0} {te ? 'నాగరికులు మద్దతిచ్చారు' : `${(upvoteCount ?? 0) === 1 ? 'citizen' : 'citizens'} supported this`}
                     </div>
-                    {!hasUpvoted ? (
-                      <button onClick={()=>setShowUpvoteInput(true)}
-                        style={{padding:'8px 16px',background:'var(--ap-navy)',color:'white',border:'none',
-                          borderRadius:'8px',fontWeight:'600',fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>
-                        {te ? 'మద్దతివ్వండి' : 'Support this'}
-                      </button>
-                    ) : (
-                      <div style={{fontSize:'13px',color:'var(--ap-green)',fontWeight:'600'}}>✓ {te ? 'మీరు మద్దతిచ్చారు' : 'You supported this'}</div>
+                    {upvoteCount >= 10 && (
+                      <div style={{fontSize:'12px',color:'#ea580c',marginTop:'2px'}}>
+                        🔥 {te ? 'కమ్యూనిటీ సమస్య — High Priority కి పెంచబడింది' : 'Community issue — escalated to High Priority'}
+                      </div>
                     )}
                   </div>
-                ) : (
-                  <div>
-                    <div style={{fontSize:'13px',fontWeight:'600',marginBottom:'8px',color:'var(--text-1)'}}>
-                      {te ? 'మీ మొబైల్ నంబర్ నమోదు చేయండి' : 'Enter your mobile to verify (one vote per person)'}
-                    </div>
-                    <div style={{display:'flex',gap:'8px'}}>
-                      <input className="form-input" value={upvotePhone} onChange={e=>setUpvotePhone(e.target.value)}
-                        placeholder="10-digit mobile" maxLength={10} style={{flex:1}}/>
-                      <button onClick={upvote} disabled={upvoteLoading}
-                        style={{padding:'10px 16px',background:'var(--ap-gold)',color:'var(--ap-navy)',
-                          border:'none',borderRadius:'8px',fontWeight:'700',cursor:'pointer',fontFamily:'inherit'}}>
-                        {upvoteLoading ? '...' : (te ? 'మద్దతివ్వండి 👍' : 'Support 👍')}
-                      </button>
-                      <button onClick={()=>setShowUpvoteInput(false)}
-                        style={{padding:'10px 12px',background:'none',border:'1px solid var(--border)',
-                          borderRadius:'8px',cursor:'pointer',fontFamily:'inherit',color:'var(--text-2)'}}>
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  {!hasUpvoted ? (
+                    <button onClick={upvote} disabled={upvoteLoading}
+                      style={{padding:'8px 16px',background:'var(--ap-navy)',color:'white',border:'none',
+                        borderRadius:'8px',fontWeight:'600',fontSize:'13px',cursor:'pointer',fontFamily:'inherit'}}>
+                      {upvoteLoading ? '...' : (te ? '👆 నాకూ ఇదే సమస్య' : '👆 I have this issue too')}
+                    </button>
+                  ) : (
+                    <div style={{fontSize:'13px',color:'var(--ap-green)',fontWeight:'600'}}>✓ {te ? 'మీరు మద్దతిచ్చారు' : 'You supported this'}</div>
+                  )}
+                </div>
               </div>
             </div>
 
