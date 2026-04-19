@@ -194,15 +194,7 @@ export default function ComplaintDetail() {
                 <div style={{fontSize:'13px',color:'var(--text-3)',fontFamily:'monospace'}}>
                   {parseFloat(c.latitude).toFixed(6)}, {parseFloat(c.longitude).toFixed(6)}
                 </div>
-                
-                  href={`https://www.google.com/maps?q=${c.latitude},${c.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{fontSize:'13px',color:'var(--ap-navy)',fontWeight:'600',textDecoration:'none',
-                    background:'var(--bg)',padding:'6px 12px',borderRadius:'8px',border:'1px solid var(--border)'}}
-                >
-                  🗺 Open in Google Maps
-                </a>
+                <a href={`https://www.google.com/maps?q=${c.latitude},${c.longitude}`} target="_blank" rel="noopener noreferrer" style={{fontSize:'13px',color:'var(--ap-navy)',fontWeight:'600',textDecoration:'none',background:'var(--bg)',padding:'6px 12px',borderRadius:'8px',border:'1px solid var(--border)'}}>Open in Google Maps</a>
               </div>
             )}
           </div>
