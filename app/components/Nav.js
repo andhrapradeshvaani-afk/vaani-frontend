@@ -13,11 +13,11 @@ export default function Nav({ lang, setLang }) {
 
   return (
     <nav className="nav">
-      <Link href="/" className="nav-brand">
-        <img src="/favicon.png" alt="Vaani" style={{width:'40px',height:'40px',borderRadius:'10px',objectFit:'cover'}} />
-        <div>
-          <div className="nav-title">Vaani</div>
-          <div className="nav-te">వాణి</div>
+      <Link href="/" className="nav-brand" style={{gap:'8px'}}>
+        <img src="/favicon.png" alt="Vaani" style={{width:'32px',height:'32px',borderRadius:'8px',objectFit:'cover',flexShrink:0}} />
+        <div style={{lineHeight:'1.2'}}>
+          <div className="nav-title" style={{fontSize:'15px'}}>Vaani</div>
+          <div className="nav-te" style={{fontSize:'10px'}}>వాణి</div>
         </div>
       </Link>
       <div className="nav-links">
