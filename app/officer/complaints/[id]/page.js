@@ -135,7 +135,7 @@ export default function ComplaintDetail() {
 
       {/* Two column layout */}
       <div style={{maxWidth:'1100px',margin:'24px auto',padding:'0 24px',
-        display:'grid',gridTemplateColumns:'1fr 380px',gap:'16px',alignItems:'start'}}>
+        display:'grid',gridTemplateColumns:'1fr 380px',gap:'16px',alignItems:'start',className:'officer-detail-grid'}}>
 
         {/* ── LEFT — Complaint Information ── */}
         <div style={{display:'flex',flexDirection:'column',gap:'14px'}}>
