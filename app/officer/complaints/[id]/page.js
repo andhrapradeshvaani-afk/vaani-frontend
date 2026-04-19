@@ -201,7 +201,7 @@ export default function ComplaintDetail() {
                   style={{fontSize:'13px',color:'var(--ap-navy)',fontWeight:'600',textDecoration:'none',
                     background:'var(--bg)',padding:'6px 12px',borderRadius:'8px',border:'1px solid var(--border)'}}
                 >
-                  🗺 Open in Google Maps →
+                  🗺 Open in Google Maps
                 </a>
               </div>
             )}
