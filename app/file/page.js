@@ -220,24 +220,7 @@ export default function FilePage() {
         </div>
         <div style={{display:'flex',gap:'12px',justifyContent:'center'}}>
           <a href={`/track?id=${success.complaint_no}`}><button className="btn-primary" style={{width:'auto',padding:'10px 24px'}}>{te?'ట్రాక్ చేయండి':'Track complaint'}</button></a>
-          
-            href={`https://wa.me/?text=${encodeURIComponent(te
-              ? `నేను వాణి యాప్ ద్వారా ఫిర్యాదు నమోదు చేశాను!%0A%0Aఫిర్యాదు ID: ${success.complaint_no}%0Avaani-ecru.vercel.app/track లో ట్రాక్ చేయండి%0A%0Aమీరు కూడా ఫిర్యాదు నమోదు చేయవచ్చు:%0Avaani-ecru.vercel.app`
-              : `I filed a complaint on Vaani — AP Grievance Portal!%0A%0AComplaint ID: ${success.complaint_no}%0ATrack status: vaani-ecru.vercel.app/track%0A%0AYou can file your complaint too:%0Avaani-ecru.vercel.app`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{textDecoration:'none'}}
-          >
-            <button style={{
-              background:'#25D366',color:'white',border:'none',
-              padding:'10px 24px',borderRadius:'10px',fontWeight:'600',
-              fontSize:'14px',cursor:'pointer',fontFamily:'inherit',
-              display:'flex',alignItems:'center',gap:'8px'
-            }}>
-              <span style={{fontSize:'16px'}}>📲</span>
-              {te ? 'WhatsApp లో షేర్ చేయండి' : 'Share on WhatsApp'}
-            </button>
-          </a>
+          <a href={`https://wa.me/?text=${encodeURIComponent(te ? 'నేను వాణి యాప్ ద్వారా ఫిర్యాదు నమోదు చేశాను! ID: ' + success.complaint_no + ' vaani-ecru.vercel.app/track' : 'I filed a complaint on Vaani! ID: ' + success.complaint_no + ' Track: vaani-ecru.vercel.app/track File yours: vaani-ecru.vercel.app/whatsapp')}`} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}}><button style={{background:'#25D366',color:'white',border:'none',padding:'10px 24px',borderRadius:'10px',fontWeight:'600',fontSize:'14px',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:'8px'}}><span style={{fontSize:'16px'}}>📲</span>{te ? 'WhatsApp లో షేర్ చేయండి' : 'Share on WhatsApp'}</button></a>
           <button className="btn-secondary" onClick={()=>{setSuccess(null);setStep(1);setOtpSent(false);setOtpVerified(false);setPreviewUrls([]);setForm({district_id:'',mandal_id:'',village:'',location_type:'',latitude:'',longitude:'',address:'',department_id:'',priority:'normal',title:'',description:'',files:[],name:'',phone:'',otp:'',lang_pref:'te'});}}>{te?'మరొక ఫిర్యాదు':'File another'}</button>
         </div>
       </div>
