@@ -28,7 +28,7 @@ export default function Nav({ lang, setLang }) {
         <Link href="/dashboard"  className={`nav-link ${path === '/dashboard' ? 'active' : ''}`}>{l.dashboard}</Link>
         <button className="lang-btn" onClick={() => setLang(lang === 'en' ? 'te' : 'en')}>{l.lang}</button>
         <Link href="/officer/login"
-          style={{fontSize:'12px',color:'var(--text-3)',textDecoration:'underline',opacity:'0.6'}}
+          style={{fontSize:'12px',color:'var(--text-3)',textDecoration:'underline',opacity:'0.6',whiteSpace:'nowrap'}}
           className={`nav-link ${path.startsWith('/officer') ? 'active' : ''}`}>
           {l.officer}
         </Link>
