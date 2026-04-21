@@ -40,6 +40,11 @@ export default function Nav({ lang, setLang }) {
           className={`nav-link ${path.startsWith('/officer') ? 'active' : ''}`}>
           {l.officer}
         </Link>
+        <Link href="/cm"
+          style={{fontSize:'12px',color:'var(--text-3)',textDecoration:'underline',opacity:'0.6',whiteSpace:'nowrap'}}
+          className={`nav-link ${path.startsWith('/cm') ? 'active' : ''}`}>
+          CM View
+        </Link>
       </div>
     </nav>
   );
