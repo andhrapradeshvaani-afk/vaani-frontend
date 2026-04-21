@@ -28,6 +28,14 @@ export default function CMDashboard() {
   const pct = (n, t) => t > 0 ? Math.round((n/t)*100) : 0;
   const fmtTime = (d) => new Date(d).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
 
+  const trend = (current, previous) => {
+    const c = safeNum(current), p = safeNum(previous);
+    if (p === 0) return null;
+    const diff = c - p;
+    const pctChange = Math.round(Math.abs(diff/p)*100);
+    return { diff, pctChange, up: diff > 0 };
+  };
+
   if (loading) return (
     <div style={{minHeight:'100vh',background:'#0f2d5e',display:'flex',alignItems:'center',justifyContent:'center'}}>
       <div style={{textAlign:'center'}}>
@@ -94,21 +102,31 @@ export default function CMDashboard() {
         {/* KPI Cards */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:'12px',marginBottom:'24px'}}>
           {[
-            { label:'Total Complaints', value:t.total, sub:'All time', color:'#0f2d5e', border:'#0f2d5e' },
-            { label:'Resolved', value:t.resolved, sub:`${resolutionRate}% rate`, color:'#166534', border:'#16a34a' },
-            { label:'Pending', value:t.pending, sub:'Awaiting action', color:'#854d0e', border:'#d97706' },
-            { label:'SLA Breached', value:t.overdue, sub:`${overdueRate}% of total`, color:'#991b1b', border:'#dc2626' },
-            { label:'Emergency', value:t.emergency, sub:'High urgency', color:'#9a3412', border:'#ea580c' },
-            { label:'Last 24 Hours', value:t.last_24_hours, sub:'New today', color:'#1e40af', border:'#2563eb' },
-            { label:'Last 7 Days', value:t.last_7_days, sub:'Weekly volume', color:'#6b21a8', border:'#7c3aed' },
-            { label:'Avg Resolution', value:t.avg_resolution_days ? `${t.avg_resolution_days}d` : 'N/A', sub:'Days to close', color:'#0f6e56', border:'#16a34a' },
-          ].map((k,i) => (
+            { label:'Total Complaints', value:t.total, sub:'All time', color:'#0f2d5e', border:'#0f2d5e', trendData: trend(t.last_7_days, t.prev_7_days), trendLabel:'vs last week', trendGoodUp: false },
+            { label:'Resolved', value:t.resolved, sub:`${resolutionRate}% rate`, color:'#166534', border:'#16a34a', trendData: trend(t.resolved_this_week, t.resolved_last_week), trendLabel:'resolved this week', trendGoodUp: true },
+            { label:'Pending', value:t.pending, sub:'Awaiting action', color:'#854d0e', border:'#d97706', trendData: null },
+            { label:'SLA Breached', value:t.overdue, sub:`${overdueRate}% of total`, color:'#991b1b', border:'#dc2626', trendData: null },
+            { label:'Emergency', value:t.emergency, sub:'High urgency', color:'#9a3412', border:'#ea580c', trendData: null },
+            { label:'Last 24 Hours', value:t.last_24_hours, sub:'New today', color:'#1e40af', border:'#2563eb', trendData: null },
+            { label:'Last 7 Days', value:t.last_7_days, sub:`vs ${t.prev_7_days||0} prev week`, color:'#6b21a8', border:'#7c3aed', trendData: trend(t.last_7_days, t.prev_7_days), trendLabel:'vs prev week', trendGoodUp: false },
+            { label:'Avg Resolution', value:t.avg_resolution_days ? `${t.avg_resolution_days}d` : 'N/A', sub:'Days to close', color:'#0f6e56', border:'#16a34a', trendData: null },
+          ].map((k,i) => {
+            const tr = k.trendData;
+            const trendColor = tr ? (k.trendGoodUp ? (tr.up?'#16a34a':'#dc2626') : (tr.up?'#dc2626':'#16a34a')) : null;
+            return (
             <div key={i} style={{background:'white',borderRadius:'12px',padding:'16px',borderTop:`3px solid ${k.border}`,boxShadow:'0 1px 4px rgba(0,0,0,0.06)'}}>
               <div style={{fontSize:'11px',color:'#888',fontWeight:'600',textTransform:'uppercase',letterSpacing:'0.04em',marginBottom:'6px'}}>{k.label}</div>
               <div style={{fontSize:'28px',fontWeight:'700',color:k.color,marginBottom:'2px'}}>{k.value}</div>
-              <div style={{fontSize:'11px',color:'#aaa'}}>{k.sub}</div>
+              {tr ? (
+                <div style={{fontSize:'11px',color:trendColor,fontWeight:'600',display:'flex',alignItems:'center',gap:'3px'}}>
+                  <span>{tr.up ? '↑' : '↓'}</span>
+                  <span>{tr.pctChange}% {k.trendLabel}</span>
+                </div>
+              ) : (
+                <div style={{fontSize:'11px',color:'#aaa'}}>{k.sub}</div>
+              )}
             </div>
-          ))}
+          );})}
         </div>
 
         {/* Tabs */}
