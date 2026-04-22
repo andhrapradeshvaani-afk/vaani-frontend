@@ -108,7 +108,7 @@ export default function Home() {
         </div>
 
         {/* DEPARTMENTS */}
-        <div>
+        <div style={{marginBottom:'48px'}}>
           <div className="page-title" style={{marginBottom:'16px'}}>{lang==='en'?'Departments covered':'విభాగాలు'}</div>
           <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
             {c.depts.map((d,i) => (
@@ -119,11 +119,70 @@ export default function Home() {
           </div>
         </div>
 
+        {/* ABOUT VAANI */}
+        <div style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'16px',padding:'32px',marginBottom:'48px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'16px'}}>
+            <div style={{width:'4px',height:'28px',background:'var(--ap-gold)',borderRadius:'2px'}}/>
+            <div style={{fontSize:'18px',fontWeight:'700',color:'var(--ap-navy)'}}>
+              {lang==='en'?'About Vaani':'వాణి గురించి'}
+            </div>
+          </div>
+          <p style={{fontSize:'14px',color:'var(--text-2)',lineHeight:'1.8',marginBottom:'16px'}}>
+            {lang==='en'
+              ? 'Andhra Pradesh has PGRS — an official grievance system. But it requires Aadhaar eKYC to log in, locking out citizens whose Aadhaar is linked to an old or unavailable mobile number. The filing form is desktop-first, and there is no mobile app for citizens.'
+              : 'ఆంధ్రప్రదేశ్‌లో PGRS అనే అధికారిక ఫిర్యాదు వ్యవస్థ ఉంది. కానీ అది లాగిన్ కోసం ఆధార్ eKYC అవసరం — పాత లేదా అందుబాటులో లేని మొబైల్ నంబర్‌తో ఆధార్ లింక్ అయిన పౌరులు లాగిన్ చేయలేరు.'
+            }
+          </p>
+          <p style={{fontSize:'14px',color:'var(--text-2)',lineHeight:'1.8',marginBottom:'20px'}}>
+            {lang==='en'
+              ? 'Vaani is built for the citizens PGRS was not designed for — mobile-first, no Aadhaar required, Telugu-first, with GPS tagging, photo evidence, and a community upvoting system that gives neighbourhoods collective voice. File a complaint in under 3 minutes, from any phone.'
+              : 'వాణి అలాంటి పౌరుల కోసం నిర్మించబడింది — మొబైల్-ఫస్ట్, ఆధార్ అవసరం లేదు, తెలుగు-ఫస్ట్, GPS ట్యాగింగ్, ఫోటో సాక్ష్యం మరియు కమ్యూనిటీ అప్‌వోటింగ్ సిస్టమ్‌తో. 3 నిమిషాల్లోపు ఏ ఫోన్ నుండైనా ఫిర్యాదు నమోదు చేయండి.'
+            }
+          </p>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'10px'}}>
+            {[
+              {icon:'📱', label: lang==='en'?'Mobile-native app':'మొబైల్ యాప్'},
+              {icon:'🔓', label: lang==='en'?'No Aadhaar needed':'ఆధార్ అవసరం లేదు'},
+              {icon:'📍', label: lang==='en'?'GPS + photo evidence':'GPS + ఫోటో సాక్ష్యం'},
+              {icon:'🗳️', label: lang==='en'?'Community upvoting':'కమ్యూనిటీ అప్‌వోటింగ్'},
+              {icon:'⚡', label: lang==='en'?'Under 3 minutes':'3 నిమిషాల్లోపు'},
+            ].map((f,i) => (
+              <div key={i} style={{display:'flex',alignItems:'center',gap:'8px',background:'white',border:'1px solid var(--border)',borderRadius:'20px',padding:'6px 14px',fontSize:'13px',fontWeight:'500',color:'var(--ap-navy)'}}>
+                <span>{f.icon}</span><span>{f.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* BUILT BY */}
+        <div style={{borderTop:'1px solid var(--border)',paddingTop:'24px',marginBottom:'8px',display:'flex',flexDirection:'column',alignItems:'center',gap:'6px',textAlign:'center'}}>
+          <div style={{fontSize:'12px',color:'var(--text-3)'}}>
+            {lang==='en'?'A civic tech initiative by':'సివిక్ టెక్ చొరవ'}
+          </div>
+          <a
+            href="https://linkedin.com/in/sahu-rajesh160608"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{fontSize:'14px',fontWeight:'600',color:'var(--ap-navy)',textDecoration:'none',display:'flex',alignItems:'center',gap:'6px'}}
+          >
+            <span style={{width:'28px',height:'28px',borderRadius:'50%',background:'var(--ap-navy)',color:'white',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'700',flexShrink:0}}>R</span>
+            Rajesh Sahu · IIT Kanpur · Product Manager
+          </a>
+          <div style={{fontSize:'11px',color:'var(--text-3)'}}>
+            {lang==='en'
+              ? 'Built solo in 24 hours · Open to collaboration with AP government'
+              : '24 గంటల్లో నిర్మించబడింది · AP ప్రభుత్వంతో సహకారానికి సిద్ధంగా ఉన్నాను'}
+          </div>
+        </div>
+
       </div>
 
       {/* FOOTER */}
       <footer style={{background:'var(--ap-navy)',color:'rgba(255,255,255,0.6)',textAlign:'center',padding:'20px',fontSize:'12px',marginTop:'40px'}}>
-        Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · Built for the people of AP
+        <div>Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · Built for the people of AP</div>
+        <div style={{marginTop:'6px',fontSize:'11px',opacity:0.7}}>
+          This is a civic tech pilot. Not an official Government of AP product.
+        </div>
       </footer>
     </>
   );
