@@ -14,7 +14,16 @@ const STATUS_COLORS = {
 };
 
 export default function CommunityPage() {
-  const [lang, setLang]             = useState('te');
+  const [lang, setLangState] = useState('te');
+    useEffect(() => {
+      const saved = localStorage.getItem('vaani_lang');
+      if (saved) setLangState(saved);
+          }, []);
+
+      const setLang = (l) => {
+        localStorage.setItem('vaani_lang', l);
+        setLangState(l);
+      };
   const [complaints, setComplaints] = useState([]);
   const [districts, setDistricts]   = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -78,7 +87,7 @@ export default function CommunityPage() {
         <div className="page-title">{te ? 'కమ్యూనిటీ సమస్యలు' : 'Community Issues'}</div>
         <div className="page-sub">
           {te
-            ? 'మీ ప్రాంతంలోని సమస్యలను చూడండి మరియు మద్దతివ్వండి.'
+            ? 'మీ ప్రాంతంలోని సమస్యలను చూడండి మరియు మద్దతివ్వండి. 10+ మంది మద్దతిస్తే ఫిర్యాదు అత్యధిక ప్రాధాన్యతకు స్వయంచాలకంగా పెరుగుతుంది.'
             : 'Browse and support issues in your area. Complaints with 10+ supporters get escalated to High Priority automatically.'}
         </div>
 
@@ -148,7 +157,7 @@ export default function CommunityPage() {
                     <div>
                       <span style={{fontWeight:'700',fontSize:'18px',color:'var(--ap-navy)'}}>{count}</span>
                       <span style={{fontSize:'12px',color:'var(--text-3)',marginLeft:'6px'}}>
-                        {count === 1 ? 'citizen' : 'citizens'} {te ? 'మద్దతిచ్చారు' : 'supported'}
+                        {te ? (count === 1 ? 'పౌరుడు' : 'పౌరులు') : (count === 1 ? 'citizen' : 'citizens')} {te ? 'మద్దతిచ్చారు' : 'supported'}
                       </span>
                       {count >= 10 && <span style={{marginLeft:'8px',fontSize:'12px',color:'#ea580c'}}>🔥 {te ? 'కమ్యూనిటీ సమస్య' : 'Community issue'}</span>}
                     </div>
