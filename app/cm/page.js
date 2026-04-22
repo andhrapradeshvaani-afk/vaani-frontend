@@ -222,8 +222,8 @@ export default function CMDashboard() {
             },
             {
               label: 'Avg Resolution',
-              value: t.avg_resolution_days != null && resolved > 0 ? `${parseFloat(t.avg_resolution_days).toFixed(1)}d` : '—',
-              sub: resolved === 0 ? 'No resolved data' : resolved === 1 ? 'Based on 1 case' : `Days to close`,
+              value: resolved > 0 && parseFloat(t.avg_resolution_days) > 0 ? `${parseFloat(t.avg_resolution_days).toFixed(1)}d` : '—',
+              sub: resolved === 0 ? 'No resolved cases yet' : resolved === 1 ? 'Only 1 case resolved' : 'Days to close',
               accent: '#0f6e56', icon: '⏱', trend: null,
             },
           ].map((k, i) => {
@@ -267,8 +267,8 @@ export default function CMDashboard() {
               <div style={{ flex: 1, minWidth: '220px', background: '#fff5f5', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '20px' }}>🚨</span>
                 <div>
-                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#991b1b' }}>{emergency} Emergency {emergency === 1 ? 'Complaint' : 'Complaints'} Active</div>
-                  <div style={{ fontSize: '11px', color: '#b91c1c', marginTop: '2px' }}>Requires immediate CM attention</div>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#991b1b' }}>{emergency} Emergency {emergency === 1 ? 'Complaint' : 'Complaints'} Flagged</div>
+                  <div style={{ fontSize: '11px', color: '#b91c1c', marginTop: '2px' }}>High priority — officer escalation in progress</div>
                 </div>
               </div>
             )}
