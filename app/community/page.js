@@ -14,7 +14,7 @@ const STATUS_COLORS = {
 };
 
 export default function CommunityPage() {
-  const [lang, setLang]             = useState('en');
+  const [lang, setLang]             = useState('te');
   const [complaints, setComplaints] = useState([]);
   const [districts, setDistricts]   = useState([]);
   const [departments, setDepartments] = useState([]);

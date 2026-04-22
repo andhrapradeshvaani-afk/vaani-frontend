@@ -12,7 +12,7 @@ const statusColors = {
 const statusOrder = ['submitted','acknowledged','assigned','in_progress','resolved','closed'];
 
 export default function TrackPage() {
-  const [lang, setLang]               = useState('en');
+  const [lang, setLang]               = useState('te');
   const [mode, setMode]               = useState('id');
   const [id, setId]                   = useState('');
   const [phone, setPhone]             = useState('');
