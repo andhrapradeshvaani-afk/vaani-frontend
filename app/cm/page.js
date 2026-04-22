@@ -5,10 +5,13 @@ import Link from 'next/link';
 const API = 'https://vaani-backend-w3zz.onrender.com';
 
 export default function CMDashboard() {
-  const [data, setData]       = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
+  const [data, setData]           = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [search, setSearch]       = useState('');
+  const [hideZero, setHideZero]   = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -16,281 +19,490 @@ export default function CMDashboard() {
     setLoading(true);
     try {
       const res = await fetch(`${API}/api/dashboard/cm`);
-      const d = await res.json();
+      const d   = await res.json();
       if (!res.ok) throw new Error(d.error);
       setData(d);
+      setLastUpdated(new Date());
       setError(null);
     } catch (e) { setError(e.message); }
     setLoading(false);
   };
 
-  const safeNum = (v) => Number(v) || 0;
-  const pct = (n, t) => t > 0 ? Math.round((n/t)*100) : 0;
-  const fmtTime = (d) => new Date(d).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+  const safeNum  = (v) => Number(v) || 0;
+  const pct      = (n, t) => t > 0 ? Math.round((n / t) * 100) : 0;
+  const fmtTime  = (d) => new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const fmtClock = (d) => d ? d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
 
   const trend = (current, previous) => {
     const c = safeNum(current), p = safeNum(previous);
-    if (p === 0) return null;
+    if (p === 0 && c === 0) return null;
+    if (p === 0) return { diff: c, pctChange: 100, up: true, isNew: true };
     const diff = c - p;
-    const pctChange = Math.round(Math.abs(diff/p)*100);
+    const pctChange = Math.round(Math.abs(diff / p) * 100);
     return { diff, pctChange, up: diff > 0 };
   };
 
+  // ── LOADING ──────────────────────────────────────────────────────────────────
   if (loading) return (
-    <div style={{minHeight:'100vh',background:'#0f2d5e',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{textAlign:'center'}}>
-        <div style={{color:'#f0a500',fontSize:'32px',fontWeight:'700',marginBottom:'8px'}}>వాణి</div>
-        <div style={{color:'rgba(255,255,255,0.6)',fontSize:'14px'}}>Loading CM Dashboard...</div>
+    <div style={{ minHeight: '100vh', background: '#0f2d5e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ color: '#f0a500', fontSize: '36px', fontWeight: '700', marginBottom: '8px', fontFamily: 'Tiro Telugu, serif' }}>వాణి</div>
+        <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Loading CM Dashboard…</div>
       </div>
     </div>
   );
 
+  // ── ERROR ─────────────────────────────────────────────────────────────────────
   if (error) return (
-    <div style={{minHeight:'100vh',background:'#0f2d5e',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{textAlign:'center'}}>
-        <div style={{color:'#f87171',fontSize:'16px',marginBottom:'12px'}}>{error}</div>
-        <button onClick={fetchData} style={{background:'#f0a500',color:'#0f2d5e',border:'none',padding:'10px 20px',borderRadius:'8px',fontWeight:'600',cursor:'pointer'}}>Retry</button>
+    <div style={{ minHeight: '100vh', background: '#0f2d5e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center', maxWidth: '360px' }}>
+        <div style={{ fontSize: '32px', marginBottom: '12px' }}>⚠</div>
+        <div style={{ color: '#fca5a5', fontSize: '15px', marginBottom: '8px', fontWeight: '600' }}>Failed to load dashboard</div>
+        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginBottom: '20px' }}>{error}</div>
+        <button onClick={fetchData} style={{ background: '#f0a500', color: '#0f2d5e', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>
+          ↻ Retry
+        </button>
       </div>
     </div>
   );
 
-  const t = data.totals;
-  const total = safeNum(t.total);
-  const resolved = safeNum(t.resolved);
-  const overdue = safeNum(t.overdue);
+  const t              = data.totals;
+  const total          = safeNum(t.total);
+  const resolved       = safeNum(t.resolved);
+  const overdue        = safeNum(t.overdue);
+  const emergency      = safeNum(t.emergency);
   const resolutionRate = pct(resolved, total);
-  const overdueRate = pct(overdue, total);
+  const overdueRate    = pct(overdue, total);
+  const pendingCount   = safeNum(t.pending);
+
+  // filtered district list
+  const filteredDistricts = (data.byDistrict || []).filter(d => {
+    const matchSearch = d.district.toLowerCase().includes(search.toLowerCase());
+    const matchZero   = hideZero ? safeNum(d.total) > 0 : true;
+    return matchSearch && matchZero;
+  });
+
+  // ── SHARED STYLES ─────────────────────────────────────────────────────────────
+  const S = {
+    // resolution bar color
+    barColor: (p) => parseFloat(p) >= 70 ? '#16a34a' : parseFloat(p) >= 30 ? '#d97706' : parseFloat(p) > 0 ? '#dc2626' : '#e5e7eb',
+    pctColor: (p) => parseFloat(p) >= 70 ? '#16a34a' : parseFloat(p) >= 30 ? '#d97706' : parseFloat(p) > 0 ? '#dc2626' : '#aaa',
+  };
+
+  // ── TABLE HEAD / BODY shared ──────────────────────────────────────────────────
+  const TableHead = ({ cols }) => (
+    <thead>
+      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e5e7eb' }}>
+        {cols.map(h => (
+          <th key={h} style={{ padding: '11px 16px', textAlign: 'left', fontSize: '10px', fontWeight: '700', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.07em', whiteSpace: 'nowrap' }}>{h}</th>
+        ))}
+      </tr>
+    </thead>
+  );
+
+  const ResBar = ({ val }) => {
+    const p = parseFloat(val) || 0;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ flex: 1, height: '5px', background: '#f0f0f0', borderRadius: '3px', minWidth: '60px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', borderRadius: '3px', width: `${Math.min(p, 100)}%`, background: S.barColor(p), transition: 'width 0.5s ease' }} />
+        </div>
+        <span style={{ fontSize: '12px', fontWeight: '700', minWidth: '38px', textAlign: 'right', color: p === 0 ? '#ccc' : S.pctColor(p) }}>
+          {p === 0 ? '—' : `${p}%`}
+        </span>
+      </div>
+    );
+  };
+
+  const Badge = ({ type, children }) => {
+    const styles = {
+      overdue:    { background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' },
+      emergency:  { background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' },
+      resolved:   { background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' },
+      pending:    { background: '#fef9c3', color: '#854d0e', border: '1px solid #fef08a' },
+      in_progress:{ background: '#dbeafe', color: '#1e40af', border: '1px solid #bfdbfe' },
+      submitted:  { background: '#e0f2fe', color: '#075985', border: '1px solid #bae6fd' },
+    };
+    const s = styles[type] || styles.pending;
+    return (
+      <span style={{ ...s, display: 'inline-block', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap', letterSpacing: '0.02em' }}>
+        {children}
+      </span>
+    );
+  };
 
   return (
-    <div style={{minHeight:'100vh',background:'#f5f6fa',fontFamily:'Plus Jakarta Sans,sans-serif'}}>
+    <div style={{ minHeight: '100vh', background: '#f5f6fa', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
 
-      {/* Header */}
-      <div style={{background:'#0f2d5e',padding:'0 32px',display:'flex',alignItems:'center',justifyContent:'space-between',height:'64px',position:'sticky',top:0,zIndex:100}}>
-        <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
-          <div style={{width:'36px',height:'36px',borderRadius:'8px',background:'#f0a500',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'18px',fontWeight:'700',color:'#0f2d5e'}}>వ</div>
+      {/* ── HEADER ─────────────────────────────────────────────────────────────── */}
+      <div style={{ background: '#0f2d5e', padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#f0a500', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '800', color: '#0f2d5e', fontFamily: 'Tiro Telugu, serif', flexShrink: 0 }}>వ</div>
           <div>
-            <div style={{color:'white',fontWeight:'700',fontSize:'16px'}}>Vaani — CM Dashboard</div>
-            <div style={{color:'rgba(255,255,255,0.5)',fontSize:'11px'}}>Andhra Pradesh Grievance Analytics</div>
+            <div style={{ color: 'white', fontWeight: '700', fontSize: '15px' }}>Vaani — CM Dashboard</div>
+            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Andhra Pradesh Grievance Analytics</div>
           </div>
         </div>
-        <div style={{display:'flex',gap:'12px',alignItems:'center'}}>
-          <button onClick={fetchData} style={{background:'rgba(255,255,255,0.1)',border:'none',color:'white',padding:'7px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'13px',fontFamily:'inherit'}}>↻ Refresh</button>
-          <Link href="/" style={{color:'rgba(255,255,255,0.6)',fontSize:'13px',textDecoration:'none'}}>← Portal</Link>
-        </div>
-      </div>
 
-      {/* Live bar */}
-      <div style={{background:'#1e3a6e',padding:'8px 32px',display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
-        <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#4ade80',flexShrink:0}}/>
-        <span style={{color:'rgba(255,255,255,0.7)',fontSize:'12px'}}>
-          Live · {t.total} total complaints · Updated {new Date().toLocaleTimeString('en-IN')}
-        </span>
-        {overdue > 0 && (
-          <span style={{marginLeft:'8px',background:'#fee2e2',color:'#991b1b',padding:'2px 10px',borderRadius:'20px',fontSize:'11px',fontWeight:'600'}}>
-            ⚠ {t.overdue} SLA Breaches
-          </span>
-        )}
-        {safeNum(t.emergency) > 0 && (
-          <span style={{background:'#ffedd5',color:'#9a3412',padding:'2px 10px',borderRadius:'20px',fontSize:'11px',fontWeight:'600'}}>
-            🚨 {t.emergency} Emergency
-          </span>
-        )}
-      </div>
-
-      <div style={{maxWidth:'1200px',margin:'0 auto',padding:'24px'}}>
-
-        {/* KPI Cards */}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:'12px',marginBottom:'24px'}}>
-          {[
-            { label:'Total Complaints', value:t.total, sub:'All time', color:'#0f2d5e', border:'#0f2d5e', trendData: trend(t.last_7_days, t.prev_7_days), trendLabel:'vs last week', trendGoodUp: false },
-            { label:'Resolved', value:t.resolved, sub:`${resolutionRate}% rate`, color:'#166534', border:'#16a34a', trendData: trend(t.resolved_this_week, t.resolved_last_week), trendLabel:'resolved this week', trendGoodUp: true },
-            { label:'Pending', value:t.pending, sub:'Awaiting action', color:'#854d0e', border:'#d97706', trendData: null },
-            { label:'SLA Breached', value:t.overdue, sub:`${overdueRate}% of total`, color:'#991b1b', border:'#dc2626', trendData: null },
-            { label:'Emergency', value:t.emergency, sub:'High urgency', color:'#9a3412', border:'#ea580c', trendData: null },
-            { label:'Last 24 Hours', value:t.last_24_hours, sub:'New today', color:'#1e40af', border:'#2563eb', trendData: null },
-            { label:'Last 7 Days', value:t.last_7_days, sub:`vs ${t.prev_7_days||0} prev week`, color:'#6b21a8', border:'#7c3aed', trendData: trend(t.last_7_days, t.prev_7_days), trendLabel:'vs prev week', trendGoodUp: false },
-            { label:'Avg Resolution', value:t.avg_resolution_days ? `${t.avg_resolution_days}d` : 'N/A', sub:'Days to close', color:'#0f6e56', border:'#16a34a', trendData: null },
-          ].map((k,i) => {
-            const tr = k.trendData;
-            const trendColor = tr ? (k.trendGoodUp ? (tr.up?'#16a34a':'#dc2626') : (tr.up?'#dc2626':'#16a34a')) : null;
-            return (
-            <div key={i} style={{background:'white',borderRadius:'12px',padding:'16px',borderTop:`3px solid ${k.border}`,boxShadow:'0 1px 4px rgba(0,0,0,0.06)'}}>
-              <div style={{fontSize:'11px',color:'#888',fontWeight:'600',textTransform:'uppercase',letterSpacing:'0.04em',marginBottom:'6px'}}>{k.label}</div>
-              <div style={{fontSize:'28px',fontWeight:'700',color:k.color,marginBottom:'2px'}}>{k.value}</div>
-              {tr ? (
-                <div style={{fontSize:'11px',color:trendColor,fontWeight:'600',display:'flex',alignItems:'center',gap:'3px'}}>
-                  <span>{tr.up ? '↑' : '↓'}</span>
-                  <span>{tr.pctChange}% {k.trendLabel}</span>
-                </div>
-              ) : (
-                <div style={{fontSize:'11px',color:'#aaa'}}>{k.sub}</div>
-              )}
+        {/* Live badge + alerts */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)', padding: '4px 10px', borderRadius: '20px' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', animation: 'pulse 2s infinite' }} />
+            <span style={{ color: '#4ade80', fontSize: '11px', fontWeight: '600', fontFamily: 'monospace' }}>
+              LIVE · {total} complaints
+            </span>
+          </div>
+          {overdue > 0 && (
+            <div style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)', color: '#fbbf24', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+              ⚠ {overdue} SLA {overdue === 1 ? 'Breach' : 'Breaches'}
             </div>
-          );})}
+          )}
+          {emergency > 0 && (
+            <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+              🚨 {emergency} Emergency
+            </div>
+          )}
+          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontFamily: 'monospace' }}>
+            {fmtClock(lastUpdated)}
+          </span>
         </div>
 
-        {/* Tabs */}
-        <div style={{display:'flex',gap:'4px',marginBottom:'20px',background:'white',padding:'4px',borderRadius:'12px',border:'1px solid #e5e7eb',width:'fit-content',flexWrap:'wrap'}}>
-          {[['overview','Overview'],['districts','Districts'],['departments','Departments'],['sla','SLA Performance'],['activity','Recent Activity']].map(([id,label]) => (
-            <button key={id} onClick={()=>setActiveTab(id)}
-              style={{padding:'8px 16px',borderRadius:'9px',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',fontWeight:'600',whiteSpace:'nowrap',
-                background:activeTab===id?'#0f2d5e':'transparent',color:activeTab===id?'#f0a500':'#888'}}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button onClick={fetchData} style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', padding: '7px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', fontWeight: '500' }}>
+            ↻ Refresh
+          </button>
+          <Link href="/" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>← Portal</Link>
+        </div>
+      </div>
+
+      {/* ── KPI CARDS ───────────────────────────────────────────────────────────── */}
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 24px 0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(148px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+          {[
+            {
+              label: 'Total Complaints', value: total, sub: 'All time',
+              accent: '#0f2d5e', icon: '📋',
+              trend: trend(t.last_7_days, t.prev_7_days), trendLabel: 'vs last week', trendGoodUp: false,
+            },
+            {
+              label: 'Resolved', value: resolved, sub: `${resolutionRate}% rate`,
+              accent: '#16a34a', icon: '✅',
+              trend: trend(t.resolved_this_week, t.resolved_last_week), trendLabel: 'this week', trendGoodUp: true,
+            },
+            {
+              label: 'Pending', value: pendingCount, sub: 'Awaiting action',
+              accent: '#d97706', icon: '⏳', trend: null,
+            },
+            {
+              label: 'SLA Breached', value: overdue, sub: `${overdueRate}% of total`,
+              accent: '#dc2626', icon: '⚠️', trend: null,
+              alert: overdue > 0,
+            },
+            {
+              label: 'Emergency', value: emergency, sub: 'High urgency',
+              accent: '#ea580c', icon: '🚨', trend: null,
+              alert: emergency > 0,
+            },
+            {
+              label: 'Last 24 Hours', value: safeNum(t.last_24_hours), sub: 'New today',
+              accent: '#2563eb', icon: '🕐', trend: null,
+            },
+            {
+              label: 'Last 7 Days', value: safeNum(t.last_7_days), sub: `vs ${safeNum(t.prev_7_days)} prev week`,
+              accent: '#7c3aed', icon: '📅',
+              trend: trend(t.last_7_days, t.prev_7_days), trendLabel: 'vs prev week', trendGoodUp: false,
+            },
+            {
+              label: 'Avg Resolution',
+              value: t.avg_resolution_days != null && resolved > 0 ? `${parseFloat(t.avg_resolution_days).toFixed(1)}d` : '—',
+              sub: resolved === 0 ? 'No resolved data' : resolved === 1 ? 'Based on 1 case' : `Days to close`,
+              accent: '#0f6e56', icon: '⏱', trend: null,
+            },
+          ].map((k, i) => {
+            const tr = k.trend;
+            const trendUp = tr?.up;
+            const trendGood = k.trendGoodUp ? trendUp : !trendUp;
+            const trendColor = tr ? (trendGood ? '#16a34a' : '#dc2626') : null;
+
+            return (
+              <div key={i} style={{
+                background: 'white',
+                borderRadius: '12px',
+                padding: '16px',
+                borderTop: `3px solid ${k.accent}`,
+                boxShadow: k.alert ? `0 0 0 1px ${k.accent}33, 0 2px 8px rgba(0,0,0,0.06)` : '0 1px 4px rgba(0,0,0,0.06)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                <div style={{ fontSize: '10px', color: '#9ca3af', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{k.label}</span>
+                  <span style={{ fontSize: '14px' }}>{k.icon}</span>
+                </div>
+                <div style={{ fontSize: '30px', fontWeight: '800', color: k.accent, marginBottom: '4px', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{k.value}</div>
+                {tr ? (
+                  <div style={{ fontSize: '11px', color: trendColor, fontWeight: '600', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontSize: '13px' }}>{trendUp ? '↑' : '↓'}</span>
+                    <span>{tr.isNew ? 'new this period' : `${tr.pctChange}% ${k.trendLabel}`}</span>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '11px', color: '#aaa' }}>{k.sub}</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── INSIGHT STRIP ──────────────────────────────────────────────────────── */}
+        {(overdue > 0 || emergency > 0 || resolutionRate < 30) && (
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+            {emergency > 0 && (
+              <div style={{ flex: 1, minWidth: '220px', background: '#fff5f5', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '20px' }}>🚨</span>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#991b1b' }}>{emergency} Emergency {emergency === 1 ? 'Complaint' : 'Complaints'} Active</div>
+                  <div style={{ fontSize: '11px', color: '#b91c1c', marginTop: '2px' }}>Requires immediate CM attention</div>
+                </div>
+              </div>
+            )}
+            {overdue > 0 && (
+              <div style={{ flex: 1, minWidth: '220px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '20px' }}>⚠️</span>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#92400e' }}>{overdue} SLA {overdue === 1 ? 'Breach' : 'Breaches'} — {overdueRate}% of total</div>
+                  <div style={{ fontSize: '11px', color: '#b45309', marginTop: '2px' }}>Deadline missed — escalation needed</div>
+                </div>
+              </div>
+            )}
+            {resolutionRate < 30 && total > 0 && (
+              <div style={{ flex: 1, minWidth: '220px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '20px' }}>📊</span>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#166534' }}>Resolution Rate: {resolutionRate}%</div>
+                  <div style={{ fontSize: '11px', color: '#16a34a', marginTop: '2px' }}>{total - resolved} complaints still need resolution</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── TABS ───────────────────────────────────────────────────────────────── */}
+        <div style={{ display: 'flex', gap: '2px', marginBottom: '16px', background: 'white', padding: '4px', borderRadius: '12px', border: '1px solid #e5e7eb', width: 'fit-content', flexWrap: 'wrap', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+          {[['overview', 'Overview'], ['districts', 'Districts'], ['departments', 'Departments'], ['sla', 'SLA Performance'], ['activity', 'Recent Activity']].map(([id, label]) => (
+            <button key={id} onClick={() => setActiveTab(id)}
+              style={{ padding: '8px 18px', borderRadius: '9px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px', fontWeight: '600', whiteSpace: 'nowrap', transition: 'all 0.15s',
+                background: activeTab === id ? '#0f2d5e' : 'transparent',
+                color: activeTab === id ? '#f0a500' : '#9ca3af',
+              }}>
               {label}
             </button>
           ))}
         </div>
 
-        {/* OVERVIEW */}
+        {/* ══════════════════════════════════════════════════════════════════════════
+            TAB: OVERVIEW
+        ══════════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'overview' && (
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
-            <div style={{background:'white',borderRadius:'16px',padding:'24px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)'}}>
-              <div style={{fontWeight:'700',fontSize:'15px',color:'#0f2d5e',marginBottom:'20px'}}>Resolution Rate</div>
-              <div style={{display:'flex',alignItems:'center',gap:'24px'}}>
-                <div style={{position:'relative',width:'120px',height:'120px',flexShrink:0}}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+
+            {/* Resolution donut */}
+            <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: '#0f2d5e', marginBottom: '20px' }}>Resolution Breakdown</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                <div style={{ position: 'relative', width: '120px', height: '120px', flexShrink: 0 }}>
                   <svg width="120" height="120" viewBox="0 0 120 120">
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="12"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="12" />
                     <circle cx="60" cy="60" r="50" fill="none" stroke="#16a34a" strokeWidth="12"
-                      strokeDasharray={`${resolutionRate*3.14} 314`} strokeLinecap="round" transform="rotate(-90 60 60)"/>
+                      strokeDasharray={`${resolutionRate * 3.14} 314`} strokeLinecap="round" transform="rotate(-90 60 60)" />
                   </svg>
-                  <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',textAlign:'center'}}>
-                    <div style={{fontSize:'22px',fontWeight:'700',color:'#0f2d5e'}}>{resolutionRate}%</div>
-                    <div style={{fontSize:'10px',color:'#888'}}>resolved</div>
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '22px', fontWeight: '800', color: '#0f2d5e' }}>{resolutionRate}%</div>
+                    <div style={{ fontSize: '10px', color: '#aaa', letterSpacing: '0.04em' }}>RESOLVED</div>
                   </div>
                 </div>
-                <div style={{flex:1}}>
-                  {[{l:'Resolved',v:t.resolved,c:'#16a34a'},{l:'In Progress',v:t.in_progress,c:'#d97706'},{l:'Pending',v:t.pending,c:'#0369a1'},{l:'Overdue',v:t.overdue,c:'#dc2626'}].map((s,i) => (
-                    <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
-                      <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                        <div style={{width:'10px',height:'10px',borderRadius:'50%',background:s.c}}/>
-                        <span style={{fontSize:'13px',color:'#555'}}>{s.l}</span>
+                <div style={{ flex: 1 }}>
+                  {[
+                    { l: 'Resolved',    v: t.resolved,    c: '#16a34a' },
+                    { l: 'In Progress', v: t.in_progress, c: '#2563eb' },
+                    { l: 'Pending',     v: t.pending,     c: '#d97706' },
+                    { l: 'Overdue',     v: t.overdue,     c: '#dc2626' },
+                  ].map((s, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: s.c, flexShrink: 0 }} />
+                        <span style={{ fontSize: '13px', color: '#555' }}>{s.l}</span>
                       </div>
-                      <span style={{fontSize:'13px',fontWeight:'700',color:s.c}}>{s.v}</span>
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: s.c, fontVariantNumeric: 'tabular-nums' }}>{safeNum(s.v)}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div style={{background:'white',borderRadius:'16px',padding:'24px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)'}}>
-              <div style={{fontWeight:'700',fontSize:'15px',color:'#0f2d5e',marginBottom:'16px'}}>🔥 Top Community Issues</div>
-              {data.topIssues.length === 0
-                ? <div style={{color:'#aaa',fontSize:'13px',textAlign:'center',padding:'20px'}}>No upvoted issues yet</div>
-                : data.topIssues.map((issue,i) => (
-                  <div key={i} style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'10px',padding:'10px',background:'#f9fafb',borderRadius:'10px'}}>
-                    <div style={{width:'36px',height:'36px',borderRadius:'8px',background:'#fff7ed',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'700',color:'#ea580c',fontSize:'14px',flexShrink:0}}>
-                      {issue.upvote_count}
-                    </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:'13px',fontWeight:'600',color:'#0f2d5e',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{issue.title}</div>
-                      <div style={{fontSize:'11px',color:'#888'}}>{issue.district} · {issue.department}</div>
-                    </div>
-                    <span style={{fontSize:'10px',fontWeight:'600',padding:'2px 8px',borderRadius:'20px',flexShrink:0,textTransform:'capitalize',
-                      background:issue.status==='resolved'?'#dcfce7':'#fef9c3',color:issue.status==='resolved'?'#166534':'#854d0e'}}>
-                      {issue.status}
-                    </span>
+            {/* Top community issues */}
+            <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: '#0f2d5e', marginBottom: '16px' }}>🔥 Top Community Issues</div>
+              {!data.topIssues || data.topIssues.length === 0 ? (
+                <div style={{ color: '#ccc', fontSize: '13px', textAlign: 'center', padding: '32px 0' }}>No upvoted issues yet</div>
+              ) : data.topIssues.map((issue, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px', padding: '10px 12px', background: '#f9fafb', borderRadius: '10px', border: '1px solid #f0f0f0' }}>
+                  <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#fff7ed', border: '1px solid #fed7aa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', color: '#ea580c', fontSize: '13px', flexShrink: 0 }}>
+                    {issue.upvote_count}
                   </div>
-                ))
-              }
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#0f2d5e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{issue.title}</div>
+                    <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>{issue.district} · {issue.department}</div>
+                  </div>
+                  <Badge type={issue.status}>{issue.status}</Badge>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* DISTRICTS */}
+        {/* ══════════════════════════════════════════════════════════════════════════
+            TAB: DISTRICTS
+        ══════════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'districts' && (
-          <div style={{background:'white',borderRadius:'16px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)',overflow:'hidden'}}>
-            <div style={{padding:'20px 24px',borderBottom:'1px solid #f0f0f0',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-              <div style={{fontWeight:'700',fontSize:'15px',color:'#0f2d5e'}}>District-wise Performance</div>
-              <div style={{fontSize:'12px',color:'#888'}}>26 districts · sorted by volume</div>
+          <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+
+            {/* Table toolbar */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ fontWeight: '700', fontSize: '15px', color: '#0f2d5e' }}>District-wise Performance</div>
+                <div style={{ fontSize: '11px', color: '#aaa', marginTop: '2px' }}>
+                  {filteredDistricts.length} of {(data.byDistrict || []).length} districts shown · sorted by volume
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Search */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '6px 12px' }}>
+                  <span style={{ color: '#9ca3af', fontSize: '12px' }}>🔍</span>
+                  <input
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search district…"
+                    style={{ background: 'none', border: 'none', outline: 'none', fontSize: '12px', fontFamily: 'inherit', color: '#0f2d5e', width: '140px' }}
+                  />
+                </div>
+                {/* Hide zero toggle */}
+                <button onClick={() => setHideZero(p => !p)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '5px', background: hideZero ? '#0f2d5e' : '#f8fafc', border: '1px solid ' + (hideZero ? '#0f2d5e' : '#e5e7eb'), borderRadius: '8px', padding: '6px 12px', fontSize: '11px', fontWeight: '600', color: hideZero ? 'white' : '#6b7280', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  {hideZero ? '● Active Only' : '○ Show All'}
+                </button>
+              </div>
             </div>
-            <div style={{overflowX:'auto'}}>
-              <table style={{width:'100%',borderCollapse:'collapse'}}>
-                <thead>
-                  <tr style={{background:'#f9fafb'}}>
-                    {['District','Total','Resolved','Overdue','Emergency','Resolution %'].map(h => (
-                      <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:'11px',fontWeight:'600',color:'#888',textTransform:'uppercase',letterSpacing:'0.04em',whiteSpace:'nowrap'}}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <TableHead cols={['District', 'Total', 'Resolved', 'Overdue / SLA', 'Emergency', 'Resolution %']} />
                 <tbody>
-                  {data.byDistrict.map((d,i) => (
-                    <tr key={i} style={{borderTop:'1px solid #f0f0f0',background:safeNum(d.overdue)>0?'#fff9f9':'white'}}>
-                      <td style={{padding:'12px 16px'}}>
-                        <div style={{fontWeight:'600',fontSize:'13px',color:'#0f2d5e'}}>{d.district}</div>
-                        <div style={{fontSize:'11px',color:'#aaa'}}>{d.district_code}</div>
-                      </td>
-                      <td style={{padding:'12px 16px',fontSize:'14px',fontWeight:'700',color:'#0f2d5e'}}>{d.total}</td>
-                      <td style={{padding:'12px 16px',fontSize:'13px',color:'#16a34a',fontWeight:'600'}}>{d.resolved}</td>
-                      <td style={{padding:'12px 16px'}}>
-                        {safeNum(d.overdue)>0
-                          ? <span style={{background:'#fee2e2',color:'#991b1b',padding:'2px 8px',borderRadius:'20px',fontSize:'11px',fontWeight:'600'}}>⚠ {d.overdue}</span>
-                          : <span style={{color:'#ccc'}}>—</span>}
-                      </td>
-                      <td style={{padding:'12px 16px'}}>
-                        {safeNum(d.emergency)>0
-                          ? <span style={{background:'#ffedd5',color:'#9a3412',padding:'2px 8px',borderRadius:'20px',fontSize:'11px',fontWeight:'600'}}>🚨 {d.emergency}</span>
-                          : <span style={{color:'#ccc'}}>—</span>}
-                      </td>
-                      <td style={{padding:'12px 16px'}}>
-                        <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                          <div style={{flex:1,height:'6px',background:'#f0f0f0',borderRadius:'3px',minWidth:'60px'}}>
-                            <div style={{height:'100%',borderRadius:'3px',width:`${Math.min(parseFloat(d.resolution_pct)||0,100)}%`,
-                              background:parseFloat(d.resolution_pct)>=70?'#16a34a':parseFloat(d.resolution_pct)>=30?'#d97706':'#dc2626'}}/>
-                          </div>
-                          <span style={{fontSize:'12px',fontWeight:'600',minWidth:'36px',
-                            color:parseFloat(d.resolution_pct)>=70?'#16a34a':parseFloat(d.resolution_pct)>=30?'#d97706':'#dc2626'}}>
-                            {d.resolution_pct||0}%
-                          </span>
-                        </div>
+                  {filteredDistricts.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#ccc', fontSize: '13px' }}>
+                        No districts match your filter
                       </td>
                     </tr>
-                  ))}
+                  ) : filteredDistricts.map((d, i) => {
+                    const hasEmergency = safeNum(d.emergency) > 0;
+                    const hasOverdue   = safeNum(d.overdue) > 0;
+                    const isZero       = safeNum(d.total) === 0;
+                    return (
+                      <tr key={i} style={{
+                        borderTop: '1px solid #f5f5f5',
+                        background: hasEmergency ? '#fff8f8' : hasOverdue ? '#fffef5' : 'white',
+                        opacity: isZero ? 0.5 : 1,
+                        transition: 'background 0.1s',
+                      }}>
+                        <td style={{ padding: '13px 16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontWeight: '700', fontSize: '13px', color: '#0f2d5e' }}>{d.district}</span>
+                                {hasEmergency && (
+                                  <span style={{ fontSize: '9px', fontWeight: '800', background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca', padding: '1px 5px', borderRadius: '4px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                                    🚨 EMERG
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '10px', color: '#ccc', fontFamily: 'monospace', marginTop: '1px' }}>{d.district_code}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '13px 16px', fontSize: '15px', fontWeight: '800', color: isZero ? '#ccc' : '#0f2d5e', fontVariantNumeric: 'tabular-nums' }}>
+                          {d.total}
+                        </td>
+                        <td style={{ padding: '13px 16px', fontSize: '13px', fontWeight: '700', color: safeNum(d.resolved) > 0 ? '#16a34a' : '#ccc', fontVariantNumeric: 'tabular-nums' }}>
+                          {safeNum(d.resolved) === 0 ? '—' : d.resolved}
+                        </td>
+                        <td style={{ padding: '13px 16px' }}>
+                          {hasOverdue
+                            ? <Badge type="overdue">⚠ {d.overdue} overdue</Badge>
+                            : <span style={{ color: '#e5e7eb' }}>—</span>}
+                        </td>
+                        <td style={{ padding: '13px 16px' }}>
+                          {hasEmergency
+                            ? <Badge type="emergency">🚨 {d.emergency}</Badge>
+                            : <span style={{ color: '#e5e7eb' }}>—</span>}
+                        </td>
+                        <td style={{ padding: '13px 16px', minWidth: '140px' }}>
+                          <ResBar val={d.resolution_pct} />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Footer summary */}
+            <div style={{ padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ fontSize: '11px', color: '#9ca3af' }}>
+                <span style={{ color: '#dc2626', fontWeight: '700' }}>{(data.byDistrict || []).filter(d => safeNum(d.emergency) > 0).length}</span> with emergency &nbsp;·&nbsp;
+                <span style={{ color: '#d97706', fontWeight: '700' }}>{(data.byDistrict || []).filter(d => safeNum(d.overdue) > 0).length}</span> with SLA breach &nbsp;·&nbsp;
+                <span style={{ color: '#aaa', fontWeight: '700' }}>{(data.byDistrict || []).filter(d => safeNum(d.total) === 0).length}</span> with no complaints
+              </div>
+              {hideZero && (data.byDistrict || []).filter(d => safeNum(d.total) === 0).length > 0 && (
+                <button onClick={() => setHideZero(false)} style={{ fontSize: '11px', color: '#0f2d5e', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600', textDecoration: 'underline' }}>
+                  Show all {(data.byDistrict || []).length} districts →
+                </button>
+              )}
             </div>
           </div>
         )}
 
-        {/* DEPARTMENTS */}
+        {/* ══════════════════════════════════════════════════════════════════════════
+            TAB: DEPARTMENTS
+        ══════════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'departments' && (
-          <div style={{background:'white',borderRadius:'16px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)',overflow:'hidden'}}>
-            <div style={{padding:'20px 24px',borderBottom:'1px solid #f0f0f0'}}>
-              <div style={{fontWeight:'700',fontSize:'15px',color:'#0f2d5e'}}>Department Performance</div>
+          <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0' }}>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: '#0f2d5e' }}>Department Performance</div>
+              <div style={{ fontSize: '11px', color: '#aaa', marginTop: '2px' }}>{(data.byDept || []).length} departments</div>
             </div>
-            <div style={{overflowX:'auto'}}>
-              <table style={{width:'100%',borderCollapse:'collapse'}}>
-                <thead>
-                  <tr style={{background:'#f9fafb'}}>
-                    {['Department','SLA Days','Total','Resolved','Overdue','Resolution %'].map(h => (
-                      <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:'11px',fontWeight:'600',color:'#888',textTransform:'uppercase',letterSpacing:'0.04em',whiteSpace:'nowrap'}}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <TableHead cols={['Department', 'SLA Limit', 'Total', 'Resolved', 'Overdue', 'Resolution %']} />
                 <tbody>
-                  {data.byDept.map((d,i) => (
-                    <tr key={i} style={{borderTop:'1px solid #f0f0f0'}}>
-                      <td style={{padding:'12px 16px'}}>
-                        <div style={{fontWeight:'600',fontSize:'13px',color:'#0f2d5e'}}>{d.department}</div>
-                        <div style={{fontSize:'11px',color:'#aaa'}}>{d.code}</div>
+                  {(data.byDept || []).map((d, i) => (
+                    <tr key={i} style={{ borderTop: '1px solid #f5f5f5', background: safeNum(d.overdue) > 0 ? '#fffef5' : 'white' }}>
+                      <td style={{ padding: '13px 16px' }}>
+                        <div style={{ fontWeight: '700', fontSize: '13px', color: '#0f2d5e' }}>{d.department}</div>
+                        <div style={{ fontSize: '10px', color: '#ccc', fontFamily: 'monospace', marginTop: '1px' }}>{d.code}</div>
                       </td>
-                      <td style={{padding:'12px 16px',fontSize:'13px',color:'#555'}}>{d.sla_days}d</td>
-                      <td style={{padding:'12px 16px',fontSize:'14px',fontWeight:'700',color:'#0f2d5e'}}>{d.total}</td>
-                      <td style={{padding:'12px 16px',fontSize:'13px',color:'#16a34a',fontWeight:'600'}}>{d.resolved}</td>
-                      <td style={{padding:'12px 16px'}}>
-                        {safeNum(d.overdue)>0
-                          ? <span style={{background:'#fee2e2',color:'#991b1b',padding:'2px 8px',borderRadius:'20px',fontSize:'11px',fontWeight:'600'}}>⚠ {d.overdue}</span>
-                          : <span style={{color:'#ccc'}}>—</span>}
+                      <td style={{ padding: '13px 16px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '600', background: '#f0f9ff', color: '#0369a1', padding: '2px 8px', borderRadius: '6px', border: '1px solid #bae6fd' }}>{d.sla_days}d</span>
                       </td>
-                      <td style={{padding:'12px 16px'}}>
-                        <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                          <div style={{flex:1,height:'6px',background:'#f0f0f0',borderRadius:'3px',minWidth:'60px'}}>
-                            <div style={{height:'100%',borderRadius:'3px',width:`${Math.min(parseFloat(d.resolution_pct)||0,100)}%`,
-                              background:parseFloat(d.resolution_pct)>=70?'#16a34a':parseFloat(d.resolution_pct)>=30?'#d97706':'#dc2626'}}/>
-                          </div>
-                          <span style={{fontSize:'12px',fontWeight:'600',minWidth:'36px',
-                            color:parseFloat(d.resolution_pct)>=70?'#16a34a':parseFloat(d.resolution_pct)>=30?'#d97706':'#dc2626'}}>
-                            {d.resolution_pct||0}%
-                          </span>
-                        </div>
+                      <td style={{ padding: '13px 16px', fontSize: '15px', fontWeight: '800', color: '#0f2d5e', fontVariantNumeric: 'tabular-nums' }}>{d.total}</td>
+                      <td style={{ padding: '13px 16px', fontSize: '13px', fontWeight: '700', color: safeNum(d.resolved) > 0 ? '#16a34a' : '#ccc', fontVariantNumeric: 'tabular-nums' }}>
+                        {safeNum(d.resolved) === 0 ? '—' : d.resolved}
+                      </td>
+                      <td style={{ padding: '13px 16px' }}>
+                        {safeNum(d.overdue) > 0
+                          ? <Badge type="overdue">⚠ {d.overdue}</Badge>
+                          : <span style={{ color: '#e5e7eb' }}>—</span>}
+                      </td>
+                      <td style={{ padding: '13px 16px', minWidth: '140px' }}>
+                        <ResBar val={d.resolution_pct} />
                       </td>
                     </tr>
                   ))}
@@ -300,42 +512,55 @@ export default function CMDashboard() {
           </div>
         )}
 
-        {/* SLA */}
+        {/* ══════════════════════════════════════════════════════════════════════════
+            TAB: SLA PERFORMANCE
+        ══════════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'sla' && (
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
-            <div style={{background:'white',borderRadius:'16px',padding:'24px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)'}}>
-              <div style={{fontWeight:'700',fontSize:'15px',color:'#0f2d5e',marginBottom:'16px'}}>SLA Breach by Department</div>
-              {data.slaPerformance.length===0
-                ? <div style={{color:'#aaa',fontSize:'13px',textAlign:'center',padding:'20px'}}>No SLA data yet</div>
-                : data.slaPerformance.map((s,i) => (
-                  <div key={i} style={{marginBottom:'16px'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:'4px'}}>
-                      <span style={{fontSize:'13px',fontWeight:'600',color:'#0f2d5e'}}>{s.department}</span>
-                      <span style={{fontSize:'13px',fontWeight:'600',color:parseFloat(s.breach_pct)>50?'#dc2626':parseFloat(s.breach_pct)>20?'#d97706':'#16a34a'}}>
-                        {s.breach_pct||0}%
-                      </span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {/* SLA by dept */}
+            <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: '#0f2d5e', marginBottom: '20px' }}>SLA Breach by Department</div>
+              {!data.slaPerformance || data.slaPerformance.length === 0 ? (
+                <div style={{ color: '#ccc', fontSize: '13px', textAlign: 'center', padding: '32px 0' }}>No SLA data yet</div>
+              ) : data.slaPerformance.map((s, i) => {
+                const bp = parseFloat(s.breach_pct) || 0;
+                const barColor = bp > 50 ? '#dc2626' : bp > 20 ? '#d97706' : '#16a34a';
+                return (
+                  <div key={i} style={{ marginBottom: '18px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                      <div>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#0f2d5e' }}>{s.department}</span>
+                        <span style={{ fontSize: '10px', color: '#aaa', marginLeft: '6px' }}>SLA: {s.sla_days}d</span>
+                      </div>
+                      <span style={{ fontSize: '13px', fontWeight: '800', color: barColor, fontVariantNumeric: 'tabular-nums' }}>{bp}%</span>
                     </div>
-                    <div style={{height:'8px',background:'#f0f0f0',borderRadius:'4px'}}>
-                      <div style={{height:'100%',borderRadius:'4px',width:`${Math.min(parseFloat(s.breach_pct)||0,100)}%`,
-                        background:parseFloat(s.breach_pct)>50?'#dc2626':parseFloat(s.breach_pct)>20?'#d97706':'#16a34a'}}/>
+                    <div style={{ height: '7px', background: '#f0f0f0', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', borderRadius: '4px', width: `${Math.min(bp, 100)}%`, background: barColor, transition: 'width 0.5s ease' }} />
                     </div>
-                    <div style={{fontSize:'11px',color:'#aaa',marginTop:'3px'}}>{s.breached} of {s.total} breached · SLA: {s.sla_days}d</div>
+                    <div style={{ fontSize: '11px', color: '#bbb', marginTop: '4px' }}>
+                      {s.breached} of {s.total} breached
+                    </div>
                   </div>
-                ))
-              }
+                );
+              })}
             </div>
-            <div style={{background:'white',borderRadius:'16px',padding:'24px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)'}}>
-              <div style={{fontWeight:'700',fontSize:'15px',color:'#0f2d5e',marginBottom:'16px'}}>SLA Health Summary</div>
+
+            {/* SLA summary */}
+            <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: '#0f2d5e', marginBottom: '20px' }}>SLA Health Summary</div>
               {[
-                {label:'On Track',val:total-overdue,color:'#16a34a',bg:'#dcfce7',icon:'✓'},
-                {label:'SLA Breached',val:t.overdue,color:'#dc2626',bg:'#fee2e2',icon:'⚠'},
-                {label:'Emergency Priority',val:t.emergency,color:'#9a3412',bg:'#ffedd5',icon:'🚨'},
-              ].map((s,i) => (
-                <div key={i} style={{display:'flex',alignItems:'center',gap:'16px',background:s.bg,borderRadius:'12px',padding:'16px',marginBottom:'12px'}}>
-                  <div style={{fontSize:'24px'}}>{s.icon}</div>
-                  <div>
-                    <div style={{fontSize:'28px',fontWeight:'700',color:s.color}}>{s.val}</div>
-                    <div style={{fontSize:'13px',color:s.color,opacity:0.8}}>{s.label}</div>
+                { label: 'On Track',          val: total - overdue,  color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: '✅' },
+                { label: 'SLA Breached',       val: overdue,          color: '#dc2626', bg: '#fff5f5', border: '#fecaca', icon: '⚠️' },
+                { label: 'Emergency Priority', val: emergency,         color: '#ea580c', bg: '#fff7ed', border: '#fed7aa', icon: '🚨' },
+              ].map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', background: s.bg, border: `1px solid ${s.border}`, borderRadius: '12px', padding: '16px', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '26px', lineHeight: 1 }}>{s.icon}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '11px', color: s.color, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '3px' }}>{s.label}</div>
+                    <div style={{ fontSize: '28px', fontWeight: '800', color: s.color, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{s.val}</div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: s.color, opacity: 0.7, textAlign: 'right' }}>
+                    {pct(s.val, total)}% of total
                   </div>
                 </div>
               ))}
@@ -343,38 +568,48 @@ export default function CMDashboard() {
           </div>
         )}
 
-        {/* ACTIVITY */}
+        {/* ══════════════════════════════════════════════════════════════════════════
+            TAB: RECENT ACTIVITY
+        ══════════════════════════════════════════════════════════════════════════ */}
         {activeTab === 'activity' && (
-          <div style={{background:'white',borderRadius:'16px',boxShadow:'0 1px 4px rgba(0,0,0,0.06)',overflow:'hidden'}}>
-            <div style={{padding:'20px 24px',borderBottom:'1px solid #f0f0f0',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-              <div style={{fontWeight:'700',fontSize:'15px',color:'#0f2d5e'}}>Recent Complaints</div>
-              <div style={{fontSize:'12px',color:'#888'}}>Latest 10</div>
+          <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: '#0f2d5e' }}>Recent Complaints</div>
+              <div style={{ fontSize: '11px', color: '#aaa' }}>Latest {(data.recentActivity || []).length}</div>
             </div>
-            {data.recentActivity.map((c,i) => (
-              <div key={i} style={{padding:'14px 24px',borderTop:i>0?'1px solid #f0f0f0':'none',display:'flex',alignItems:'center',gap:'12px'}}>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:'600',fontSize:'13px',color:'#0f2d5e',marginBottom:'2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{c.title}</div>
-                  <div style={{fontSize:'11px',color:'#888'}}>{c.complaint_no} · {c.district} · {c.department}</div>
+            {(!data.recentActivity || data.recentActivity.length === 0) ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: '#ccc', fontSize: '13px' }}>No recent activity</div>
+            ) : (data.recentActivity || []).map((c, i) => (
+              <div key={i} style={{ padding: '14px 20px', borderTop: i > 0 ? '1px solid #f5f5f5' : 'none', display: 'flex', alignItems: 'center', gap: '12px', background: c.is_overdue ? '#fffef5' : c.priority === 'emergency' ? '#fff8f8' : 'white' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: '600', fontSize: '13px', color: '#0f2d5e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '3px' }}>{c.title}</div>
+                  <div style={{ fontSize: '11px', color: '#9ca3af', fontFamily: 'monospace' }}>
+                    {c.complaint_no} &nbsp;·&nbsp; {c.district} &nbsp;·&nbsp; {c.department}
+                  </div>
                 </div>
-                <div style={{display:'flex',gap:'6px',alignItems:'center',flexShrink:0}}>
-                  {c.is_overdue && <span style={{background:'#fee2e2',color:'#991b1b',padding:'2px 8px',borderRadius:'20px',fontSize:'10px',fontWeight:'600'}}>Overdue</span>}
-                  {c.priority==='emergency' && <span style={{background:'#ffedd5',color:'#9a3412',padding:'2px 8px',borderRadius:'20px',fontSize:'10px',fontWeight:'600'}}>Emergency</span>}
-                  <span style={{fontSize:'10px',fontWeight:'600',padding:'2px 10px',borderRadius:'20px',textTransform:'capitalize',
-                    background:c.status==='resolved'?'#dcfce7':c.status==='in_progress'?'#f3e8ff':'#fef9c3',
-                    color:c.status==='resolved'?'#166534':c.status==='in_progress'?'#6b21a8':'#854d0e'}}>
-                    {c.status.replace('_',' ')}
-                  </span>
-                  <span style={{fontSize:'11px',color:'#aaa',whiteSpace:'nowrap'}}>{fmtTime(c.created_at)}</span>
+                <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  {c.is_overdue && <Badge type="overdue">Overdue</Badge>}
+                  {c.priority === 'emergency' && <Badge type="emergency">🚨 Emergency</Badge>}
+                  <Badge type={c.status}>{c.status.replace('_', ' ')}</Badge>
+                  <span style={{ fontSize: '11px', color: '#ccc', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>{fmtTime(c.created_at)}</span>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        <div style={{textAlign:'center',padding:'24px 0 8px',fontSize:'12px',color:'#aaa'}}>
-          Vaani · వాణి · AP Citizen Grievance Portal · CM Analytics
+        <div style={{ textAlign: 'center', padding: '24px 0 8px', fontSize: '11px', color: '#ccc', letterSpacing: '0.04em' }}>
+          Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · CM Analytics
         </div>
       </div>
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,222,128,0.4); }
+          50%       { opacity: 0.8; box-shadow: 0 0 0 5px rgba(74,222,128,0); }
+        }
+        tr:hover td { background: inherit; }
+      `}</style>
     </div>
   );
 }
