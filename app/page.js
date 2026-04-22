@@ -155,7 +155,7 @@ export default function Home() {
         </div>
 
         {/* BUILT BY */}
-        <div style={{borderTop:'1px solid var(--border)',paddingTop:'24px',marginBottom:'8px',display:'flex',flexDirection:'column',alignItems:'center',gap:'6px',textAlign:'center'}}>
+        <div style={{paddingTop:'0px',marginBottom:'8px',display:'flex',flexDirection:'column',alignItems:'center',gap:'6px',textAlign:'center'}}>
           <div style={{fontSize:'12px',color:'var(--text-3)'}}>
             {lang==='en'?'A civic tech initiative by':'సివిక్ టెక్ చొరవ'}
           </div>
