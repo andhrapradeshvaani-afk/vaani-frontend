@@ -34,7 +34,12 @@ export default function Nav({ lang, setLang }) {
         <Link href="/track"      className={`nav-link ${path === '/track' ? 'active' : ''}`}>{l.track}</Link>
         <Link href="/community"  className={`nav-link ${path === '/community' ? 'active' : ''}`}>{l.community}</Link>
         <Link href="/dashboard"  className={`nav-link ${path === '/dashboard' ? 'active' : ''}`}>{l.dashboard}</Link>
-        <button className="lang-btn" onClick={() => setLang(lang === 'en' ? 'te' : 'en')}>{l.lang}</button>
+       <button className="lang-btn" onClick={() => {
+          const newLang = lang === 'en' ? 'te' : 'en';
+          localStorage.setItem('vaani_lang', newLang);
+          window.dispatchEvent(new Event('vaani_lang_change'));
+          setLang(newLang);
+        }}>{l.lang}</button>
         <Link href="/officer/login"
           style={{fontSize:'12px',color:'var(--text-3)',textDecoration:'underline',opacity:'0.6',whiteSpace:'nowrap'}}
           className={`nav-link ${path.startsWith('/officer') ? 'active' : ''}`}>

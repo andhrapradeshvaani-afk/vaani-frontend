@@ -39,7 +39,21 @@ const content = {
 };
 
 export default function Home() {
-  const [lang, setLang] = useState('te');
+const [lang, setLangState] = useState('te');
+useEffect(() => {
+  const sync = () => {
+    const saved = localStorage.getItem('vaani_lang');
+    if (saved) setLangState(saved);
+  };
+  sync(); // run on mount
+  window.addEventListener('vaani_lang_change', sync);
+  return () => window.removeEventListener('vaani_lang_change', sync);
+}, []);
+const setLang = (l) => {
+  localStorage.setItem('vaani_lang', l);
+  window.dispatchEvent(new Event('vaani_lang_change'));
+  setLangState(l);
+};
   const [stats, setStats] = useState({ total: 0, resolved: 0, in_progress: 0, pending: 0 });
   const c = content[lang];
 

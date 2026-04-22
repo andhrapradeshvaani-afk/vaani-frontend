@@ -18,7 +18,6 @@ const STEPS = {
 };
 
 export default function FilePage() {
-  const [lang, setLang]           = useState('te');
   const [step, setStep]           = useState(1);
   const [districts, setDistricts] = useState([]);
   const [mandals, setMandals]     = useState([]);
@@ -32,6 +31,22 @@ export default function FilePage() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [previewUrls, setPreviewUrls] = useState([]);
   const fileInputRef = useRef();
+
+  const [lang, setLangState] = useState('te');
+useEffect(() => {
+  const sync = () => {
+    const saved = localStorage.getItem('vaani_lang');
+    if (saved) setLangState(saved);
+  };
+  sync(); // run on mount
+  window.addEventListener('vaani_lang_change', sync);
+  return () => window.removeEventListener('vaani_lang_change', sync);
+}, []);
+const setLang = (l) => {
+  localStorage.setItem('vaani_lang', l);
+  window.dispatchEvent(new Event('vaani_lang_change'));
+  setLangState(l);
+};
 
   const [form, setForm] = useState({
     district_id: '', mandal_id: '', village: '',

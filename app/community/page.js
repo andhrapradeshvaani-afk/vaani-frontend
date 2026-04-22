@@ -14,16 +14,21 @@ const STATUS_COLORS = {
 };
 
 export default function CommunityPage() {
-  const [lang, setLangState] = useState('te');
-    useEffect(() => {
-      const saved = localStorage.getItem('vaani_lang');
-      if (saved) setLangState(saved);
-          }, []);
-
-      const setLang = (l) => {
-        localStorage.setItem('vaani_lang', l);
-        setLangState(l);
-      };
+ const [lang, setLangState] = useState('te');
+useEffect(() => {
+  const sync = () => {
+    const saved = localStorage.getItem('vaani_lang');
+    if (saved) setLangState(saved);
+  };
+  sync(); // run on mount
+  window.addEventListener('vaani_lang_change', sync);
+  return () => window.removeEventListener('vaani_lang_change', sync);
+}, []);
+const setLang = (l) => {
+  localStorage.setItem('vaani_lang', l);
+  window.dispatchEvent(new Event('vaani_lang_change'));
+  setLangState(l);
+};
   const [complaints, setComplaints] = useState([]);
   const [districts, setDistricts]   = useState([]);
   const [departments, setDepartments] = useState([]);
