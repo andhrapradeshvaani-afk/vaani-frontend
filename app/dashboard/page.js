@@ -11,7 +11,7 @@ export default function DashboardPage() {
     if (saved) setLangState(saved);
     }, []);
     const setLang = (l) => {
-    l ocalStorage.setItem('vaani_lang', l);
+    localStorage.setItem('vaani_lang', l);
     setLangState(l);
     };
   const [data, setData]     = useState(null);
