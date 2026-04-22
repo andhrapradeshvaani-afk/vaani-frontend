@@ -137,7 +137,15 @@ export default function CMDashboard() {
       {/* ── HEADER ─────────────────────────────────────────────────────────────── */}
       <div style={{ background: '#0f2d5e', padding: '0 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 12px rgba(0,0,0,0.2)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#f0a500', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '800', color: '#0f2d5e', fontFamily: 'Tiro Telugu, serif', flexShrink: 0 }}>వ</div>
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <rect width="36" height="36" rx="8" fill="#0f2d5e"/>
+            <circle cx="13" cy="11" r="4" fill="#f0a500"/>
+            <path d="M9 16 Q7 22 8 28 L18 28 Q19 22 17 16 Z" fill="#f0a500"/>
+            <path d="M16 18 L24 13" stroke="#f0a500" strokeWidth="2.5" strokeLinecap="round"/>
+            <path d="M24 11 L24 16 L28 17.5 L28 9.5 Z" fill="#f0a500"/>
+            <path d="M28 9.5 L34 7 L34 20 L28 17.5 Z" fill="#f0a500" opacity="0.75"/>
+            <path d="M35 11 Q37 14 35 17" fill="none" stroke="#f0a500" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
           <div>
             <div style={{ color: 'white', fontWeight: '700', fontSize: '15px' }}>Vaani — CM Dashboard</div>
             <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Andhra Pradesh Grievance Analytics</div>
