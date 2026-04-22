@@ -31,8 +31,13 @@ export default function CMDashboard() {
   const safeNum  = (v) => Number(v) || 0;
   const pct      = (n, t) => t > 0 ? Math.round((n / t) * 100) : 0;
   const fmtTime  = (d) => new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-  const fmtClock = (d) => d ? d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
-
+  const fmtClock = (d) => {
+    if (!d) return '—';
+    const mins = Math.floor((new Date() - d) / 60000);
+    if (mins < 1) return 'Just updated';
+    if (mins === 1) return 'Updated 1 min ago';
+    return `Updated ${mins} mins ago`;
+  };
   const trend = (current, previous) => {
     const c = safeNum(current), p = safeNum(previous);
     if (p === 0 && c === 0) return null;
@@ -170,8 +175,8 @@ export default function CMDashboard() {
               🚨 {emergency} Emergency
             </div>
           )}
-          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontFamily: 'monospace' }}>
-            {fmtClock(lastUpdated)}
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
+           {fmtClock(lastUpdated)}
           </span>
         </div>
 
@@ -607,7 +612,14 @@ export default function CMDashboard() {
         )}
 
         <div style={{ textAlign: 'center', padding: '24px 0 8px', fontSize: '11px', color: '#ccc', letterSpacing: '0.04em' }}>
-          Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · CM Analytics
+          <div>Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · CM Analytics</div>
+            <div style={{ marginTop: '4px' }}>
+              Built by{' '}
+              <a href="https://linkedin.com/in/sahu-rajesh160608" target="_blank" rel="noopener noreferrer"
+                style={{ color: '#f0a500', textDecoration: 'none', fontWeight: '600' }}>
+                Rajesh Sahu · IIT Kanpur
+              </a>
+            </div>
         </div>
       </div>
 
