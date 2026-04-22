@@ -39,7 +39,7 @@ const content = {
 };
 
 export default function Home() {
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState('te');
   const [stats, setStats] = useState({ total: 0, resolved: 0, in_progress: 0, pending: 0 });
   const c = content[lang];
 

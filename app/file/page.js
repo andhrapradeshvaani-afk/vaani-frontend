@@ -18,7 +18,7 @@ const STEPS = {
 };
 
 export default function FilePage() {
-  const [lang, setLang]           = useState('en');
+  const [lang, setLang]           = useState('te');
   const [step, setStep]           = useState(1);
   const [districts, setDistricts] = useState([]);
   const [mandals, setMandals]     = useState([]);
@@ -199,8 +199,8 @@ export default function FilePage() {
       {STEPS[lang].map((s, i) => (
         <div key={i} style={{flex:1,position:'relative'}}>
           <div style={{height:'4px',background:i<step?'var(--ap-navy)':'var(--border)',borderRadius:i===0?'2px 0 0 2px':i===3?'0 2px 2px 0':'0'}}/>
-          <div style={{width:'20px',height:'20px',borderRadius:'50%',background:i<step?'var(--ap-navy)':i===step-1?'var(--ap-gold)':'var(--border)',position:'absolute',top:'-8px',left:'50%',transform:'translateX(-50%)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:'700',color:i<step?'white':i===step-1?'var(--ap-navy)':'var(--text-3)',border:'2px solid white'}}>{i<step-1?'✓':i+1}</div>
-          <div style={{fontSize:'10px',color:i===step-1?'var(--ap-navy)':'var(--text-3)',textAlign:'center',marginTop:'14px',fontWeight:i===step-1?'600':'400'}}>{s}</div>
+          <div style={{width:'20px',height:'20px',borderRadius:'50%',background:i<step?'var(--ap-navy)':i===step-1?'var(--ap-gold)':'#94a3b8',position:'absolute',top:'-8px',left:'50%',transform:'translateX(-50%)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:'700',color:i<step?'white':i===step-1?'var(--ap-navy)':'var(--text-3)',border:'2px solid white'}}>{i<step-1?'✓':i+1}</div>
+          <div style={{fontSize:'10px',color:i===step-1?'var(--ap-navy)':'#64748b',textAlign:'center',marginTop:'14px',fontWeight:i===step-1?'600':'400'}}>{s}</div>
         </div>
       ))}
     </div>
@@ -264,7 +264,7 @@ export default function FilePage() {
                   placeholder={te?'ఉదా: మెయిన్ రోడ్, బస్ స్టాండ్ దగ్గర':'e.g. Main road near bus stand, Ward 4'} />
               </div>
               <div className="form-group">
-                <label className="form-label">{te?'సమస్య రకం':'Type of location'}</label>
+                <label className="form-label">{te?'సమస్య రకం (ఐచ్ఛికం)':'Type of location (optional)'}</label>
                 <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
                   {LOCATION_TYPES.map((lt,i)=>(
                     <button key={i} type="button" onClick={()=>set('location_type',lt.en)}
@@ -284,7 +284,7 @@ export default function FilePage() {
                   </div>
                 ):(
                   <button type="button" onClick={detectGPS} disabled={gpsLoading}
-                    style={{display:'flex',alignItems:'center',gap:'8px',padding:'10px 16px',borderRadius:'8px',border:'1.5px dashed var(--border)',background:'var(--bg)',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:'var(--text-2)',width:'100%',justifyContent:'center'}}>
+                    style={{display:'flex',alignItems:'center',gap:'8px',padding:'10px 16px',borderRadius:'8px',border:'1.5px solid var(--ap-navy)',background:'var(--bg)',cursor:'pointer',fontFamily:'inherit',fontSize:'13px',color:'var(--text-2)',width:'100%',justifyContent:'center'}}>
                     {gpsLoading?(te?'వెతుకుతోంది...':'Detecting...'):(te?'📍 నా GPS స్థానాన్ని గుర్తించండి':'📍 Auto-detect my location')}
                   </button>
                 )}
