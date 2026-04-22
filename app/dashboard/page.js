@@ -11,12 +11,25 @@ export default function DashboardPage() {
     if (saved) setLangState(saved);
     }, []);
     const setLang = (l) => {
-    localStorage.setItem('vaani_lang', l);
+    l ocalStorage.setItem('vaani_lang', l);
     setLangState(l);
     };
   const [data, setData]     = useState(null);
   const [loading, setLoading] = useState(true);
   const te = lang === 'te';
+
+  const deptNames = {
+  'Roads & Infrastructure': 'రోడ్లు & మౌలిక సదుపాయాలు',
+  'Electricity (APSPDCL)': 'విద్యుత్ (APSPDCL)',
+  'Agriculture': 'వ్యవసాయం',
+  'Municipal Services': 'పురపాలక సేవలు',
+  'Revenue & Land': 'రెవెన్యూ & భూమి',
+  'Education': 'విద్య',
+  'Health & Medical': 'ఆరోగ్యం & వైద్యం',
+  'Police': 'పోలీసు',
+  'Water Supply & Sanitation': 'నీటి సరఫరా & పారిశుద్ధ్యం',
+  'Other': 'ఇతర',
+};
 
   useEffect(() => {
     fetch(`${API}/api/dashboard/public`)
@@ -72,14 +85,16 @@ export default function DashboardPage() {
                 return (
                   <div key={i} style={{padding:'12px 0',borderBottom:'1px solid var(--border)'}}>
                     <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px',alignItems:'center'}}>
-                      <div style={{fontSize:'14px',fontWeight:'500'}}>{d.department}</div>
-                      <div style={{display:'flex',gap:'12px',alignItems:'center'}}>
+                    <div style={{fontSize:'14px',fontWeight:'500'}}>
+                      {te ? (deptNames[d.department] || d.department) : d.department}
+                    </div>                      
+                    <div style={{display:'flex',gap:'12px',alignItems:'center'}}>
                         <span style={{fontSize:'12px',color:'var(--text-3)'}}>
                           {d.total} {te?'ఫిర్యాదులు':'complaints'}
                         </span>
                         {d.overdue > 0 && (
                           <span style={{fontSize:'11px',background:'#fee2e2',color:'#991b1b',padding:'2px 8px',borderRadius:'10px',fontWeight:'600'}}>
-                            {d.overdue} {te?'ఆలస్యం':'overdue'}
+                          {d.overdue} {te ? 'ఆలస్యంగా ఉన్నవి' : 'overdue'}
                           </span>
                         )}
                         <span style={{fontSize:'13px',fontWeight:'600',color: resPct > 75 ? 'var(--ap-green)' : resPct > 40 ? '#2563eb' : 'var(--ap-red)'}}>
