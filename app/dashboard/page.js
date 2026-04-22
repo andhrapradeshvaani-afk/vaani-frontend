@@ -5,7 +5,15 @@ import Nav from '../components/Nav';
 const API = 'https://vaani-backend-w3zz.onrender.com';
 
 export default function DashboardPage() {
-  const [lang, setLang]     = useState('te');
+    const [lang, setLangState] = useState('te');
+    useEffect(() => {
+    const saved = localStorage.getItem('vaani_lang');
+    if (saved) setLangState(saved);
+    }, []);
+    const setLang = (l) => {
+    localStorage.setItem('vaani_lang', l);
+    setLangState(l);
+    };
   const [data, setData]     = useState(null);
   const [loading, setLoading] = useState(true);
   const te = lang === 'te';

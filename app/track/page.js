@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Nav from '../components/Nav';
 
 const API = 'https://vaani-backend-w3zz.onrender.com';
@@ -12,7 +12,15 @@ const statusColors = {
 const statusOrder = ['submitted','acknowledged','assigned','in_progress','resolved','closed'];
 
 export default function TrackPage() {
-  const [lang, setLang]               = useState('te');
+  const [lang, setLangState] = useState('te');
+    useEffect(() => {
+    const saved = localStorage.getItem('vaani_lang');
+    if (saved) setLangState(saved);
+    }, []);
+    const setLang = (l) => {
+    localStorage.setItem('vaani_lang', l);
+    setLangState(l);
+    };
   const [mode, setMode]               = useState('id');
   const [id, setId]                   = useState('');
   const [phone, setPhone]             = useState('');
@@ -273,7 +281,7 @@ export default function TrackPage() {
                 <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                   <div>
                     <div style={{fontSize:'13px',fontWeight:'600',color:'var(--text-1)'}}>
-                      👆 {upvoteCount ?? 0} {te ? 'నాగరికులు మద్దతిచ్చారు' : `${(upvoteCount ?? 0) === 1 ? 'citizen' : 'citizens'} supported this`}
+                      👆 {upvoteCount ?? 0} {te ? `${(upvoteCount ?? 0) === 1 ? 'పౌరుడు' : 'పౌరులు'} మద్దతిచ్చారు` : `${(upvoteCount ?? 0) === 1 ? 'citizen' : 'citizens'} supported this`}
                     </div>
                     {upvoteCount >= 10 && (
                       <div style={{fontSize:'12px',color:'#ea580c',marginTop:'2px'}}>
@@ -310,7 +318,14 @@ export default function TrackPage() {
                       position:'absolute',top:'-3px',left:'50%',transform:'translateX(-50%)',
                       border:'2px solid white'}}/>
                     <div style={{fontSize:'10px',color:'var(--text-3)',textAlign:'center',marginTop:'10px',textTransform:'capitalize'}}>
-                      {s.replace('_',' ')}
+                     {te ? {
+                      submitted: 'సమర్పించబడింది',
+                      acknowledged: 'స్వీకరించబడింది',
+                      assigned: 'కేటాయించబడింది',
+                      in_progress: 'పురోగతిలో',
+                      resolved: 'పరిష్కరించబడింది',
+                      closed: 'మూసివేయబడింది',
+                      }[s] || s.replace('_',' ') : s.replace('_',' ')}
                     </div>
                   </div>
                 ))}
@@ -331,8 +346,16 @@ export default function TrackPage() {
                 <div className="tl-item" key={i}>
                   <div className={`tl-dot ${statusColors[t.status] || 'pending'}`}/>
                   <div>
-                    <div className="tl-text" style={{textTransform:'capitalize'}}>
-                      {t.status.replace('_',' ')}
+                      <div className="tl-text" style={{textTransform:'capitalize'}}>
+                        {te ? {
+                          submitted: 'సమర్పించబడింది',
+                          acknowledged: 'స్వీకరించబడింది',
+                          assigned: 'కేటాయించబడింది',
+                          in_progress: 'పురోగతిలో',
+                          resolved: 'పరిష్కరించబడింది',
+                          closed: 'మూసివేయబడింది',
+                          rejected: 'తిరస్కరించబడింది',
+                        }[t.status] || t.status.replace('_',' ') : t.status.replace('_',' ')}
                       {t.updated_by && <span style={{color:'var(--text-3)',fontSize:'12px',fontWeight:'400'}}> · {t.updated_by}</span>}
                     </div>
                     {t.note && <div style={{fontSize:'13px',color:'var(--text-2)',marginTop:'2px'}}>{t.note}</div>}
