@@ -14,7 +14,7 @@ const content = {
     how_title: 'How it works',
     steps: [
       { n: '1', t: 'File your complaint', s: 'Describe the issue, attach a photo, pick your district and department.' },
-      { n: '2', t: 'Get your complaint ID', s: 'Receive a unique ID like AP-2025-CTR-00421 instantly via SMS.' },
+      { n: '2', t: 'Get your complaint ID', s: 'Receive a unique ID like AP-2026-CTR-00421 instantly via SMS.' },
       { n: '3', t: 'Government acts', s: 'Your complaint is routed to the right department with an SLA deadline.' },
       { n: '4', t: 'Track & close', s: 'Follow every status update until your issue is resolved.' },
     ],
@@ -30,7 +30,7 @@ const content = {
     how_title: 'ఇది ఎలా పని చేస్తుంది',
     steps: [
       { n: '1', t: 'ఫిర్యాదు నమోదు చేయండి', s: 'సమస్యను వివరించండి, ఫోటో జోడించండి, జిల్లా మరియు విభాగం ఎంచుకోండి.' },
-      { n: '2', t: 'ఫిర్యాదు ID పొందండి', s: 'AP-2025-CTR-00421 వంటి ప్రత్యేక ID SMS ద్వారా వెంటనే అందుతుంది.' },
+      { n: '2', t: 'ఫిర్యాదు ID పొందండి', s: 'AP-2026-CTR-00421 వంటి ప్రత్యేక ID SMS ద్వారా వెంటనే అందుతుంది.' },
       { n: '3', t: 'ప్రభుత్వం చర్య తీసుకుంటుంది', s: 'మీ ఫిర్యాదు సరైన విభాగానికి SLA గడువుతో పంపబడుతుంది.' },
       { n: '4', t: 'ట్రాక్ & మూసివేయండి', s: 'మీ సమస్య పరిష్కారమయ్యే వరకు ప్రతి స్థితి నవీకరణను అనుసరించండి.' },
     ],
