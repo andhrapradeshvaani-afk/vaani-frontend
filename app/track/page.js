@@ -98,7 +98,7 @@ const setLang = (l) => {
       });
       const data = await res.json();
       setMyComplaints(data);
-      if (data.length === 0) setError(te ? 'ఈ నంబర్‌కు ఫిర్యాదులు లేవు' : 'No complaints found for this number');
+
     } catch { setError('Failed to fetch complaints. Please try again.'); }
     setLoading(false);
   };
@@ -207,6 +207,32 @@ const setLang = (l) => {
         )}
 
         {error && <div className="alert alert-error">{error}</div>}
+
+                {myComplaints && myComplaints.length === 0 && !result && (
+          <div className="card" style={{textAlign:'center', padding:'40px'}}>
+            <div style={{fontSize:'40px', marginBottom:'12px'}}>📭</div>
+            <div style={{fontWeight:'700', fontSize:'16px', color:'var(--ap-navy)', marginBottom:'8px'}}>
+              {te ? 'ఈ నంబర్‌కు ఫిర్యాదులు లేవు' : 'No complaints found for this number'}
+            </div>
+            <div style={{fontSize:'13px', color:'var(--text-2)', marginBottom:'24px', lineHeight:'1.6'}}>
+              {te
+                ? 'మీరు ఇంకా ఫిర్యాదు నమోదు చేయలేదు. దిగువ బటన్లను ఉపయోగించండి.'
+                : "You haven't filed any complaints yet. Use the buttons below to get started."}
+            </div>
+            <div style={{display:'flex', gap:'12px', justifyContent:'center', flexWrap:'wrap'}}>
+              <a href="/file">
+                <button style={{background:'var(--ap-navy)', color:'white', border:'none', padding:'10px 24px', borderRadius:'10px', fontWeight:'600', fontSize:'14px', cursor:'pointer', fontFamily:'inherit'}}>
+                  📝 {te ? 'ఫిర్యాదు నమోదు చేయండి' : 'File a Complaint'}
+                </button>
+              </a>
+              <a href="/community">
+                <button style={{background:'var(--ap-gold-lt)', color:'var(--ap-navy)', border:'1.5px solid var(--ap-gold)', padding:'10px 24px', borderRadius:'10px', fontWeight:'600', fontSize:'14px', cursor:'pointer', fontFamily:'inherit'}}>
+                  👥 {te ? 'కమ్యూనిటీ సమస్యలు చూడండి' : 'Browse Community Issues'}
+                </button>
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* My Complaints List */}
         {myComplaints && myComplaints.length > 0 && !result && (
