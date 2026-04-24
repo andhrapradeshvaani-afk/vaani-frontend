@@ -8,7 +8,7 @@ export const viewport = {
 
 export const metadata = {
   title: 'Vaani — వాణి | AP Citizen Grievance Portal',
-  description: 'File and track your complaints to the Andhra Pradesh government. ఆంధ్రప్రదేశ్ పౌర ఫిర్యాదు పోర్టల్.',
+  description: 'File civic complaints in under 3 minutes. No Aadhaar needed. Free for every AP citizen of Andhra Pradesh.',
   icons: {
     icon: '/favicon.png',
     apple: '/favicon.png',
@@ -16,9 +16,26 @@ export const metadata = {
   },
   openGraph: {
     title: 'Vaani — వాణి | AP Citizen Grievance Portal',
-    description: 'File and track complaints to the Andhra Pradesh government.',
-    images: ['/favicon.png'],
+    description: 'File civic complaints in under 3 minutes. No Aadhaar needed. Free for every AP citizen.',
+    url: 'https://vaani-ecru.vercel.app',
+    siteName: 'Vaani',
+    images: [
+      {
+        url: 'https://vaani-ecru.vercel.app/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Vaani — AP Citizen Grievance Portal',
+      }
+    ],
+    locale: 'te_IN',
+    type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vaani — వాణి | AP Citizen Grievance Portal',
+    description: 'File civic complaints in under 3 minutes. No Aadhaar needed. Free for every AP citizen.',
+    images: ['https://vaani-ecru.vercel.app/og-image.png'],
+  }
 };
 
 export default function RootLayout({ children }) {
