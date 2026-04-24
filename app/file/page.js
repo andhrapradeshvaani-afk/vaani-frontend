@@ -51,7 +51,7 @@ const setLang = (l) => {
   const [form, setForm] = useState({
     district_id: '', mandal_id: '', village: '',
     location_type: '', latitude: '', longitude: '', address: '',
-    department_id: '', priority: 'normal', title: '', description: '',
+    department_id: '', problem_type_label: '', priority: 'normal', title: '', description: '',
     files: [],
     name: '', phone: '', otp: '', lang_pref: 'te',
   });
@@ -239,7 +239,7 @@ const setLang = (l) => {
             ? `నేను వాణి ద్వారా ఫిర్యాదు నమోదు చేశాను!\n\nఫిర్యాదు ID: ${success.complaint_no}\n\n👆 మీకూ ఇదే సమస్య ఉంటే మద్దతివ్వండి:\nvaani-ecru.vercel.app/community\n\n📝 మీ ఫిర్యాదు నమోదు చేయండి (ఆధార్ అవసరం లేదు):\nvaani-ecru.vercel.app`
             : `I filed a complaint on Vaani — AP's citizen grievance platform.\n\nComplaint ID: ${success.complaint_no}\n\n👆 Have the same issue? Support this complaint:\nvaani-ecru.vercel.app/community\n\n📝 File your own complaint (free, no Aadhaar needed):\nvaani-ecru.vercel.app`
           )}`} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}}><button style={{background:'#25D366',color:'white',border:'none',padding:'10px 24px',borderRadius:'10px',fontWeight:'600',fontSize:'14px',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:'8px'}}><span style={{fontSize:'16px'}}>📲</span>{te ? 'WhatsApp లో షేర్ చేయండి' : 'Share on WhatsApp'}</button></a>
-          <button className="btn-secondary" onClick={()=>{setSuccess(null);setStep(1);setOtpSent(false);setOtpVerified(false);setPreviewUrls([]);setForm({district_id:'',mandal_id:'',village:'',location_type:'',latitude:'',longitude:'',address:'',department_id:'',priority:'normal',title:'',description:'',files:[],name:'',phone:'',otp:'',lang_pref:'te'});}}>{te?'మరొక ఫిర్యాదు':'File another'}</button>
+          <button className="btn-secondary" onClick={()=>{setSuccess(null);setStep(1);setOtpSent(false);setOtpVerified(false);setPreviewUrls([]);setForm({district_id:'',mandal_id:'',village:'',location_type:'',latitude:'',longitude:'',address:'',department_id:'',problem_type_label:'',priority:'normal',title:'',description:'',files:[],name:'',phone:'',otp:'',lang_pref:'te'});}}>{te?'మరొక ఫిర్యాదు':'File another'}</button>
         </div>
       </div>
     </>
@@ -310,32 +310,76 @@ const setLang = (l) => {
               </div>
             </div>
           )}
-
-          {step === 2 && (
+            {step === 2 && (
             <div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">{te?'విభాగం':'Which department?'} *</label>
-                  <select className="form-select" value={form.department_id} onChange={e=>set('department_id',e.target.value)}>
-                    <option value="">{te?'విభాగం ఎంచుకోండి':'Select department'}</option>
-                    {depts.map(d=><option key={d.id} value={d.id}>{te&&d.name_te?d.name_te:d.name}</option>)}
-                  </select>
+              {/* Smart Problem Type Picker */}
+              <div className="form-group">
+                <label className="form-label">{te ? 'సమస్య రకం ఏమిటి?' : 'What type of problem is this?'} *</label>
+                <div style={{fontSize:'12px', color:'var(--text-3)', marginBottom:'12px'}}>
+                  {te ? 'మీ సమస్యకు దగ్గరగా ఉన్నదాన్ని ఎంచుకోండి — మేము సరైన అధికారికి పంపుతాము' : "Pick what best describes your issue — we'll route it to the right department automatically"}
                 </div>
-                <div className="form-group">
-                  <label className="form-label">{te?'ఎంత అత్యవసరం?':'How urgent is this?'}</label>
-                  <select className="form-select" value={form.priority} onChange={e=>set('priority',e.target.value)}>
-                    <option value="normal">{te?'సాధారణ — వేచి ఉండగలను':'Normal — can wait'}</option>
-                    <option value="urgent">{te?'అత్యవసర — వేగంగా అవసరం':'Urgent — needed soon'}</option>
-                    <option value="emergency">{te?'అత్యంత అత్యవసర — ప్రమాదకరం':'Emergency — safety risk'}</option>
-                  </select>
+                <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:'10px', marginBottom:'16px'}}>
+                  {[
+                    { id: 1, icon: '🕳️', en: 'Road / Pothole / Bridge', te: 'రోడ్డు / గుంత / వంతెన' },
+                    { id: 2, icon: '💧', en: 'Water Supply / Tap Water', te: 'నీటి సరఫరా / కుళాయి' },
+                    { id: 3, icon: '⚡', en: 'Electricity / Power Cut', te: 'విద్యుత్ / కరెంట్ కోత' },
+                    { id: 3, icon: '🌆', en: 'Street Lights Not Working', te: 'వీధి దీపాలు పని చేయడం లేదు' },
+                    { id: 6, icon: '🗑️', en: 'Garbage / Drainage / Sewage', te: 'చెత్త / డ్రైనేజీ / మురుగు' },
+                    { id: 5, icon: '🏫', en: 'School / Teachers / Meals', te: 'పాఠశాల / ఉపాధ్యాయులు / భోజనం' },
+                    { id: 4, icon: '🏥', en: 'Hospital / Doctor / Medicine', te: 'ఆసుపత్రి / డాక్టర్ / మందులు' },
+                    { id: 8, icon: '🌾', en: 'Agriculture / Irrigation / Crop', te: 'వ్యవసాయం / సాగునీరు / పంట' },
+                    { id: 7, icon: '📋', en: 'Land / Patta / Survey', te: 'భూమి / పట్టా / సర్వే' },
+                    { id: 6, icon: '🏗️', en: 'Public Building / Park / Toilet', te: 'ప్రభుత్వ భవనం / పార్కు / మరుగుదొడ్డి' },
+                  ].map((pt, i) => {
+                    const isSelected = form.department_id == pt.id && form.problem_type_label === (te ? pt.te : pt.en);
+                    return (
+                      <button key={i} type="button"
+                        onClick={() => { set('department_id', pt.id); set('problem_type_label', te ? pt.te : pt.en); }}
+                        style={{
+                          padding: '12px 10px',
+                          borderRadius: '10px',
+                          border: isSelected ? '2px solid var(--ap-navy)' : '1.5px solid var(--border)',
+                          background: isSelected ? 'var(--ap-navy)' : 'var(--bg)',
+                          color: isSelected ? 'white' : 'var(--text-1)',
+                          cursor: 'pointer',
+                          fontFamily: 'inherit',
+                          textAlign: 'center',
+                          transition: 'all 0.15s',
+                        }}>
+                        <div style={{fontSize:'24px', marginBottom:'6px'}}>{pt.icon}</div>
+                        <div style={{fontSize:'11px', fontWeight:'600', lineHeight:'1.3'}}>
+                          {te ? pt.te : pt.en}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
+                {form.department_id && (
+                  <div style={{background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:'8px', padding:'8px 14px', fontSize:'12px', color:'#166534', marginBottom:'8px'}}>
+                    ✓ {te ? 'మేము మీ ఫిర్యాదును సరైన విభాగానికి పంపుతాము' : "We'll route this to the right department automatically"}
+                  </div>
+                )}
               </div>
+
+              {/* Urgency */}
+              <div className="form-group">
+                <label className="form-label">{te?'ఎంత అత్యవసరం?':'How urgent is this?'}</label>
+                <select className="form-select" value={form.priority} onChange={e=>set('priority',e.target.value)}>
+                  <option value="normal">{te?'సాధారణ — వేచి ఉండగలను':'Normal — can wait'}</option>
+                  <option value="urgent">{te?'అత్యవసర — వేగంగా అవసరం':'Urgent — needed soon'}</option>
+                  <option value="emergency">{te?'అత్యంత అత్యవసర — ప్రమాదకరం':'Emergency — safety risk'}</option>
+                </select>
+              </div>
+
+              {/* Problem title */}
               <div className="form-group">
                 <label className="form-label">{te?'సమస్య ఏమిటి?':'What is the problem?'} *</label>
                 <input className="form-input" value={form.title} onChange={e=>set('title',e.target.value)}
                   placeholder={te?'ఉదా: బస్ స్టాండ్ దగ్గర రోడ్డుకు పెద్ద గుంత ఉంది':'e.g. Large pothole near bus stand causing accidents'} />
                 <div style={{fontSize:'11px',color:'var(--text-3)',marginTop:'4px'}}>{te?'సమస్యను ఒక వాక్యంలో వివరించండి':'One clear sentence describing the problem'}</div>
               </div>
+
+              {/* Full details */}
               <div className="form-group">
                 <label className="form-label">{te?'పూర్తి వివరాలు':'Full details'} *</label>
                 <textarea className="form-textarea" value={form.description} onChange={e=>set('description',e.target.value)} style={{minHeight:'120px'}}
