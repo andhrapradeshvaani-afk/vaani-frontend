@@ -26,7 +26,7 @@ const setLang = (l) => {
 
   const deptNames = {
   'Roads & Infrastructure': 'రోడ్లు & మౌలిక సదుపాయాలు',
-  'Electricity (APSPDCL)': 'విద్యుత్ (APSPDCL)',
+  'Electricity': 'విద్యుత్',
   'Agriculture': 'వ్యవసాయం',
   'Municipal Services': 'పురపాలక సేవలు',
   'Revenue & Land': 'రెవెన్యూ & భూమి',

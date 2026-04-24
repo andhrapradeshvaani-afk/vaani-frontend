@@ -29,12 +29,6 @@ export const metadata = {
     ],
     locale: 'te_IN',
     type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Vaani — వాణి | AP Citizen Grievance Portal',
-    description: 'File civic complaints in under 3 minutes. No Aadhaar needed. Free for every AP citizen.',
-    images: ['https://vaani-ecru.vercel.app/og-image.png'],
   }
 };
 
