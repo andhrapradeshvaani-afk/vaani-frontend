@@ -201,7 +201,7 @@ const setLang = (l) => {
   </div>
 
   <div style={{fontSize:'11px',opacity:0.6}}>
-    This is a civic tech pilot. Not an official Government of AP product.
+    This is a civic tech pilot. Not an official product of AP Government.
   </div>
 </footer>
     </>
