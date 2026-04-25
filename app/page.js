@@ -169,42 +169,41 @@ const setLang = (l) => {
         </div>
 
         {/* BUILT BY */}
-        <div style={{paddingTop:'0px',marginBottom:'8px',display:'flex',flexDirection:'column',alignItems:'center',gap:'6px',textAlign:'center'}}>
-          <div style={{fontSize:'12px',color:'var(--text-3)'}}>
-            {lang==='en'?'A civic tech initiative by':'సివిక్ టెక్ చొరవ'}
-          </div>
-          <a
-            href="https://linkedin.com/in/sahu-rajesh160608"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{fontSize:'14px',fontWeight:'600',color:'var(--ap-navy)',textDecoration:'none',display:'flex',alignItems:'center',gap:'6px'}}
-          >
-            <span style={{width:'28px',height:'28px',borderRadius:'50%',background:'var(--ap-navy)',color:'white',display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:'12px',fontWeight:'700',flexShrink:0}}>R</span>
-            Rajesh Sahu · IIT Kanpur · Product Manager
-          </a>
-          <div style={{fontSize:'11px',color:'var(--text-3)'}}>
-            {lang==='en'
-              ? 'Built solo in 24 hours · Open to collaboration with AP government'
-              : '24 గంటల్లో నిర్మించబడింది · AP ప్రభుత్వంతో సహకారానికి సిద్ధంగా ఉన్నాను'}
-          </div>
-        </div>
+        
 
       </div>
 
-      {/* FOOTER */}
-        <footer style={{background:'var(--ap-navy)',color:'rgba(255,255,255,0.6)',textAlign:'center',padding:'20px',fontSize:'12px',marginTop:'40px'}}>
-      <div>Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · Built for the people of AP</div>
-      <div style={{marginTop:'6px',fontSize:'11px',opacity:0.7}}>
-        This is a civic tech pilot. Not an official Government of AP product.
-      </div>
-      <div style={{marginTop:'8px',fontSize:'11px',color:'rgba(255,255,255,0.4)'}}>
-        Built solo, end-to-end ·{' '}
-        <a href="https://linkedin.com/in/sahu-rajesh-160608" target="_blank" rel="noopener noreferrer"
-          style={{color:'#f0a500',textDecoration:'none',fontWeight:'600'}}>
-          Rajesh Sahu · IIT Kanpur
-        </a>
-      </div>
-    </footer>
+     {/* FOOTER */}
+<footer style={{background:'var(--ap-navy)',color:'rgba(255,255,255,0.6)',textAlign:'center',padding:'24px 20px',fontSize:'12px',marginTop:'40px'}}>
+  <div style={{fontSize:'13px',marginBottom:'10px'}}>
+    Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · Built for the people of AP
+  </div>
+
+  <div style={{fontSize:'12px',marginBottom:'12px'}}>
+    {lang==='en'
+      ? 'A civic tech initiative by'
+      : 'సివిక్ టెక్ చొరవ'}
+    {' '}
+    <a
+      href="https://linkedin.com/in/sahu-rajesh160608"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{color:'#f0a500',textDecoration:'none',fontWeight:'600'}}
+    >
+      Rajesh Sahu · IIT Kanpur
+    </a>
+  </div>
+
+  <div style={{fontSize:'11px',marginBottom:'10px',opacity:0.85}}>
+    {lang==='en'
+      ? 'Built solo, end-to-end · Open to collaboration with the AP government'
+      : 'ఒంటరిగా నిర్మించబడింది · AP ప్రభుత్వంతో సహకారానికి సిద్ధంగా ఉన్నాను'}
+  </div>
+
+  <div style={{fontSize:'11px',opacity:0.6}}>
+    This is a civic tech pilot. Not an official Government of AP product.
+  </div>
+</footer>
     </>
   );
 }
