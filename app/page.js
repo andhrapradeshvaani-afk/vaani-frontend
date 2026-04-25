@@ -192,12 +192,19 @@ const setLang = (l) => {
       </div>
 
       {/* FOOTER */}
-      <footer style={{background:'var(--ap-navy)',color:'rgba(255,255,255,0.6)',textAlign:'center',padding:'20px',fontSize:'12px',marginTop:'40px'}}>
-        <div>Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · Built for the people of AP</div>
-        <div style={{marginTop:'6px',fontSize:'11px',opacity:0.7}}>
-          This is a civic tech pilot. Not an official Government of AP product.
-        </div>
-      </footer>
+        <footer style={{background:'var(--ap-navy)',color:'rgba(255,255,255,0.6)',textAlign:'center',padding:'20px',fontSize:'12px',marginTop:'40px'}}>
+      <div>Vaani · వాణి · Andhra Pradesh Citizen Grievance Portal · Built for the people of AP</div>
+      <div style={{marginTop:'6px',fontSize:'11px',opacity:0.7}}>
+        This is a civic tech pilot. Not an official Government of AP product.
+      </div>
+      <div style={{marginTop:'8px',fontSize:'11px',color:'rgba(255,255,255,0.4)'}}>
+        Built solo, end-to-end ·{' '}
+        <a href="https://linkedin.com/in/sahu-rajesh-160608" target="_blank" rel="noopener noreferrer"
+          style={{color:'#f0a500',textDecoration:'none',fontWeight:'600'}}>
+          Rajesh Sahu · IIT Kanpur
+        </a>
+      </div>
+    </footer>
     </>
   );
 }
