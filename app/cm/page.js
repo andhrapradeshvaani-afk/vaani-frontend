@@ -265,6 +265,78 @@ export default function CMDashboard() {
           })}
         </div>
 
+                {/* ── AI BRIEF PANEL (paste starts here) ─────────────────────────────────── */}
+        <div style={{
+          background: 'linear-gradient(135deg, #0f2d5e 0%, #1e3a8a 100%)',
+          borderRadius: '12px',
+          padding: '20px 24px',
+          marginBottom: '16px',
+          boxShadow: '0 4px 16px rgba(15, 45, 94, 0.18)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 16,
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute',
+            right: -20, top: -20,
+            width: 140, height: 140,
+            background: 'radial-gradient(circle, rgba(240,165,0,0.15), transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, minWidth: 280 }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 12,
+              background: 'rgba(240, 165, 0, 0.15)',
+              border: '1px solid rgba(240, 165, 0, 0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 22, color: '#f0a500', fontWeight: 800,
+              flexShrink: 0,
+            }}>✦</div>
+            <div>
+              <div style={{
+                display: 'inline-block',
+                background: 'rgba(240, 165, 0, 0.15)',
+                color: '#f0a500',
+                fontSize: 9, fontWeight: 700,
+                padding: '2px 7px', borderRadius: 4,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                marginBottom: 6,
+              }}>
+                New · AI-powered
+              </div>
+              <div style={{ color: 'white', fontWeight: 700, fontSize: 16, marginBottom: 2 }}>
+                AI Daily Brief for District Collectors
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12, lineHeight: 1.5 }}>
+                Ranked priorities · SLA breach alerts · geographic hotspots · recommended actions — auto-generated for any AP district.
+              </div>
+            </div>
+          </div>
+
+          <Link href="/cm/brief" style={{
+            background: '#f0a500',
+            color: '#0f2d5e',
+            padding: '10px 18px',
+            borderRadius: 8,
+            fontWeight: 700,
+            fontSize: 13,
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+            fontFamily: 'inherit',
+            letterSpacing: '0.02em',
+          }}>
+            Open AI Brief →
+          </Link>
+        </div>
+        {/* ── AI BRIEF PANEL ends ──────────────────────────────────────────────── */}
+
+       
+
         {/* ── INSIGHT STRIP ──────────────────────────────────────────────────────── */}
         {(overdue > 0 || emergency > 0 || resolutionRate < 30) && (
           <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
